@@ -16,12 +16,15 @@ $(BUILD)/engine_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_math.h 
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_engine_test.cpp -o $@
 $(BUILD)/sample_math_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_math.h tests/pop_sample_math_test.cpp tests/check.h | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_sample_math_test.cpp -o $@
-test: $(BUILD)/engine_test $(BUILD)/adapter_test $(BUILD)/rates_test $(BUILD)/sample_math_test
+$(BUILD)/regressions_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_regressions_test.cpp tests/check.h | $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_regressions_test.cpp -o $@
+test: $(BUILD)/engine_test $(BUILD)/adapter_test $(BUILD)/rates_test $(BUILD)/sample_math_test $(BUILD)/regressions_test
 	$(BUILD)/sample_math_test
 	python3 tests/check_arm_imports_test.py
 	$(BUILD)/engine_test
 	$(BUILD)/adapter_test
 	$(BUILD)/rates_test
+	$(BUILD)/regressions_test
 sanitize:
 	$(MAKE) BUILD=build/sanitize CXXFLAGS='-std=c++17 -O1 -g $(WARN) -fno-exceptions -fno-rtti -ffp-contract=off -fsanitize=address,undefined -fno-omit-frame-pointer' test
 $(BUILD)/adapter_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_adapter_test.cpp tests/check.h tests/fixtures/internal.h | $(BUILD)

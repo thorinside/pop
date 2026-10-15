@@ -78,7 +78,7 @@ void actions() {
     h.set(ManualParam, 1);
     std::fill(h.buffers.begin(), h.buffers.end(), 0);
     h.buffers[0] = 5;
-    h.factory->step(h.algorithm, h.buffers.data(), 1);
+    h.step(1);
     CHECK(inspectEngine(h.algorithm).acceptedRequests() == 2);
     const auto request = inspectEngine(h.algorithm).requestState();
     CHECK(h.load());
@@ -108,12 +108,12 @@ void actions() {
     CHECK(input.load());
     for (float v : {5.0f, 1.5f, std::numeric_limits<float>::quiet_NaN(), 2.0f}) {
         std::fill(input.buffers.begin(), input.buffers.end(), v);
-        input.factory->step(input.algorithm, input.buffers.data(), 1);
+        input.step(1);
     }
     CHECK(inspectEngine(input.algorithm).acceptedRequests() == 0);
     for (float v : {1.0f, 1.5f, 2.0f, 5.0f, std::numeric_limits<float>::infinity(), 5.0f}) {
         std::fill_n(input.buffers.data(), 256, v);
-        input.factory->step(input.algorithm, input.buffers.data(), 1);
+        input.step(1);
     }
     CHECK(inspectEngine(input.algorithm).acceptedRequests() == 1);
     std::puts("live,05-actions,manual/held/ignored/simultaneous/nonfinite/hysteresis,PASS");
@@ -199,6 +199,7 @@ void routing() {
     host::Instance loaded;
     CHECK(loaded.load(json));
     loaded.set(TimingParam, 1);
+    loaded.process(4);
     CHECK(loaded.values[RateParam] == -2 && loaded.values[DurationParam] == 6);
     CHECK(h.factory->guid == NT_MULTICHAR('T', 'h', 'P', 'o'));
     CHECK(h.algorithm->parameterPages->numPages == 3);
@@ -305,7 +306,7 @@ void restartSnapshot() {
                 for (int i = 0; i < 4; ++i)
                     if (base + i == 0 || base + i == 580 || base + i == 680)
                         h.buffers[static_cast<size_t>(i)] = 5;
-                h.factory->step(h.algorithm, h.buffers.data(), 1);
+                h.step(1);
                 for (int i = 0; i < 4; ++i) {
                     const int t = base + i;
                     const bool expectedBurst =

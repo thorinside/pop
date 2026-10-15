@@ -55,6 +55,7 @@ struct Algorithm : _NT_algorithm {
     Engine engine;
     Schmitt trigger, clock;
     bool manualArmed = false, resetPending = true, updating = false;
+    bool retainedPending = false;
     int mode = 0;
     int internalRate = 200, clockRate = 0, internalDuration = 500, clockDuration = 2;
     uint32_t fs = NT_globals.sampleRate;
@@ -78,11 +79,13 @@ void setValue(const Algorithm &a, int p, int value) {
 void updateMode(Algorithm &a) {
     if (a.updating || !a.v || a.v[TimingParam] < 0 || a.v[TimingParam] > 1)
         return;
-    if (a.mode == a.v[TimingParam])
+    if (a.mode == a.v[TimingParam] && !a.retainedPending)
         return;
-    // parameterChanged sees the new Timing but the old mode's Rate/Duration.
-    remember(a);
+    // A load owns retained values until step; host restore callbacks may still be arriving.
+    if (!a.retainedPending)
+        remember(a);
     a.mode = a.v[TimingParam];
+    a.retainedPending = false;
     a.updating = true;
     if (a.mode) {
         a.definitions[RateParam] = {"Rate", -3, 3, 0, kNT_unitHasStrings, 0, nullptr};
@@ -99,7 +102,7 @@ void updateMode(Algorithm &a) {
 }
 void changed(_NT_algorithm *self, int p) {
     auto &a = *static_cast<Algorithm *>(self);
-    if (a.updating || !a.v)
+    if (a.updating || a.retainedPending || !a.v)
         return;
     if (p == TimingParam)
         updateMode(a);
@@ -156,7 +159,10 @@ void step(_NT_algorithm *self, float *buffers, int by4) {
         static_cast<uint32_t>(by4) * 4 > NT_globals.maxFramesPerStep)
         return;
     const int frames = by4 * 4;
+    const bool loaded = a.retainedPending;
     updateMode(a);
+    if (loaded)
+        changed(self, TimingParam);
     const int params[7] = {TimingParam,    TriggerInputParam, ClockInputParam, BurstOutputParam,
                            BurstModeParam, ActiveOutputParam, ActiveModeParam};
     bool reset = a.resetPending || a.fs != NT_globals.sampleRate;
@@ -262,7 +268,7 @@ int parameterString(_NT_algorithm *, int p, int v, char *buffer) {
 }
 void serialise(_NT_algorithm *self, _NT_jsonStream &stream) {
     auto &a = *static_cast<Algorithm *>(self);
-    if (a.v)
+    if (a.v && !a.retainedPending)
         remember(a);
     stream.addMemberName("internalRate");
     stream.addNumber(a.internalRate);
@@ -280,6 +286,7 @@ bool deserialise(_NT_algorithm *self, _NT_jsonParse &parse) {
     a.clock = {};
     a.manualArmed = false;
     a.resetPending = true;
+    a.retainedPending = false;
     int n = 0, ir = 200, cr = 0, id = 500, cd = 2;
     if (!parse.numberOfObjectMembers(n) || n < 0 || n > 64)
         return false;
@@ -305,12 +312,7 @@ bool deserialise(_NT_algorithm *self, _NT_jsonParse &parse) {
     a.clockRate = cr;
     a.internalDuration = id;
     a.clockDuration = cd;
-    if (a.v) {
-        a.updating = true;
-        setValue(a, RateParam, a.mode ? cr : ir);
-        setValue(a, DurationParam, a.mode ? cd : id);
-        a.updating = false;
-    }
+    a.retainedPending = true;
     return true;
 }
 const _NT_factory factory = {NT_MULTICHAR('T', 'h', 'P', 'o'),

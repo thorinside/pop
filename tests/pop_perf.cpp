@@ -54,7 +54,7 @@ Result measure(const char *scenario, bool baseline, std::FILE *blocks, int repet
         if (baseline)
             host::emptyHost(h.buffers.data(), frames);
         else
-            h.factory->step(h.algorithm, h.buffers.data(), frames / 4);
+            h.step(frames / 4);
         const auto stop = Clock::now();
         host::trackingAllocations = false;
         const double ns = std::chrono::duration<double, std::nano>(stop - start).count();
