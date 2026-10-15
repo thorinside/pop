@@ -1,4 +1,5 @@
 #include "pop_engine.h"
+#include "pop_sample_math.h"
 #include <cmath>
 
 namespace pop {
@@ -34,7 +35,7 @@ double contourHeight(Contour contour, double u) {
     return 0.0;
 }
 uint64_t internalGap(double length, bool onset, uint32_t width, uint32_t gap, uint8_t &limits) {
-    const auto rounded = static_cast<uint64_t>(std::ceil(length));
+    const auto rounded = ceilIntervalSamples(length);
     const uint64_t minimum = onset ? 1 : static_cast<uint64_t>(width) + gap;
     if (rounded < minimum) {
         limits |= PhysicalLimited;
@@ -58,8 +59,8 @@ Engine::Engine(uint32_t sampleRate, uint32_t seed)
 }
 void Engine::safetyReset(uint32_t sampleRate) {
     fs_ = sampleRate ? sampleRate : 48000;
-    width_ = static_cast<uint32_t>((static_cast<uint64_t>(fs_) * 5 + 999) / 1000);
-    gap_ = static_cast<uint32_t>((static_cast<uint64_t>(fs_) + 999) / 1000);
+    width_ = static_cast<uint32_t>(millisecondsSamples(fs_, 5));
+    gap_ = static_cast<uint32_t>(millisecondsSamples(fs_, 1));
     phase_ = Phase::Idle;
     fall_ = ready_ = now_;
     dueValid_ = false;
@@ -88,14 +89,14 @@ void Engine::accept(const Settings &settings) {
 }
 void Engine::activate() {
     activation_ = now_;
-    deadline_ = now_ + (static_cast<uint64_t>(snapshot_.durationMs) * fs_ + 999) / 1000;
+    deadline_ = now_ + millisecondsSamples(fs_, static_cast<uint32_t>(snapshot_.durationMs));
     phase_ = Phase::Generating;
     schedule(true);
 }
 void Engine::schedule(bool onset) {
     double u = 0.5;
     if (snapshot_.termination == Termination::Duration) {
-        u = static_cast<double>(now_ - activation_) / static_cast<double>(deadline_ - activation_);
+        u = sampleCountAsDouble(now_ - activation_) / sampleCountAsDouble(deadline_ - activation_);
     } else if (snapshot_.count > 2) {
         u = static_cast<double>(emitted_) / static_cast<double>(snapshot_.count - 1);
     }

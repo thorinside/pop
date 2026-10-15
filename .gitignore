@@ -1,3 +1,5 @@
 /build/
+/evidence/
+__pycache__/
 *.plist
 .DS_Store
