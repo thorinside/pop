@@ -14,12 +14,15 @@ struct Trace {
 };
 class Instance {
   public:
-    explicit Instance(bool injectedSeed = true);
+    explicit Instance(bool injectedSeed = true, uint32_t commonOffset = 0);
     ~Instance();
     Instance(const Instance &) = delete;
     Instance &operator=(const Instance &) = delete;
     void set(int p, int value);
     void process(int frames, float fill = 0.0f);
+    void step(int framesBy4);
+    uint32_t commonOffset;
+    unsigned audioSetterCalls = 0;
     Trace run(int samples, int partition, const std::vector<uint64_t> &starts, int triggerBus = 1);
     bool load(Json json = {});
     Json save();

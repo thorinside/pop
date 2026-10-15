@@ -26,8 +26,14 @@ uint32_t cycleCount = 0x6d2b79f4u;
 void sampleRate(uint32_t value) { hostGlobals.sampleRate = value; }
 static Instance *instances[64]{};
 static Instance *drawing = nullptr;
-Instance::Instance(bool injectedSeed)
-    : factory(reinterpret_cast<const _NT_factory *>(pluginEntry(kNT_selector_factoryInfo, 0))) {
+static unsigned audioContextDepth = 0;
+static uint32_t commonOffset = 0;
+struct AudioContext {
+    AudioContext() { ++audioContextDepth; }
+    ~AudioContext() { --audioContextDepth; }
+};
+Instance::Instance(bool injectedSeed, uint32_t offset)
+    : commonOffset(offset), factory(reinterpret_cast<const _NT_factory *>(pluginEntry(kNT_selector_factoryInfo, 0))) {
     CHECK(factory && pluginEntry(kNT_selector_version, 0) == 14 &&
           pluginEntry(kNT_selector_numFactories, 0) == 1);
     factory->calculateRequirements(requirements, nullptr);
@@ -51,7 +57,7 @@ Instance::Instance(bool injectedSeed)
     algorithm->v = values.data();
     algorithm->vIncludingCommon = values.data();
     for (int p = 0; p < pop::NumParameters; ++p)
-        factory->parameterChanged(algorithm, p);
+        set(p, values[static_cast<size_t>(p)]);
     process(4);
     if (injectedSeed)
         pop::injectSeed(algorithm, 1);
@@ -64,12 +70,19 @@ Instance::~Instance() {
 void Instance::set(int p, int value) {
     CHECK(p >= 0 && p < pop::NumParameters);
     values[static_cast<size_t>(p)] = static_cast<int16_t>(value);
+    AudioContext context;
+    host::commonOffset = commonOffset;
     factory->parameterChanged(algorithm, p);
+}
+void Instance::step(int framesBy4) {
+    AudioContext context;
+    host::commonOffset = commonOffset;
+    factory->step(algorithm, buffers.data(), framesBy4);
 }
 void Instance::process(int frames, float fill) {
     CHECK(frames > 0 && frames <= 128 && frames % 4 == 0);
     std::fill_n(buffers.data(), 64 * frames, fill);
-    factory->step(algorithm, buffers.data(), frames / 4);
+    step(frames / 4);
     const int output = values[pop::BurstOutputParam];
     previousBurst = output >= 1 && output <= 64 &&
                     buffers[static_cast<size_t>((output - 1) * frames + frames - 1)] >= 5;
@@ -89,7 +102,7 @@ Trace Instance::run(int samples, int partition, const std::vector<uint64_t> &sta
             if (std::find(starts.begin(), starts.end(), t) != starts.end() && triggerBus > 0)
                 buffers[static_cast<size_t>((triggerBus - 1) * frames + i)] = 5.0f;
         }
-        factory->step(algorithm, buffers.data(), frames / 4);
+        step(frames / 4);
         for (int i = 0; i < frames; ++i) {
             const float b =
                 buffers[static_cast<size_t>((values[pop::BurstOutputParam] - 1) * frames + i)];
@@ -144,14 +157,20 @@ int32_t NT_algorithmIndex(const _NT_algorithm *a) {
             return i;
     return -1;
 }
-uint32_t NT_parameterOffset() { return 0; }
+uint32_t NT_parameterOffset() { return host::commonOffset; }
 void NT_setParameterFromAudio(uint32_t i, uint32_t p, int16_t value) {
-    CHECK(i < 64 && host::instances[i] && p < pop::NumParameters);
-    host::instances[i]->set(static_cast<int>(p), value);
+    CHECK(host::audioContextDepth > 0);
+    CHECK(i < 64 && host::instances[i]);
+    auto &instance = *host::instances[i];
+    CHECK(p >= instance.commonOffset && p < instance.commonOffset + pop::NumParameters);
+    ++instance.audioSetterCalls;
+    instance.set(static_cast<int>(p - instance.commonOffset), value);
 }
 void NT_setParameterGrayedOut(uint32_t i, uint32_t p, bool gray) {
-    CHECK(i < 64 && host::instances[i] && p < pop::NumParameters);
-    host::instances[i]->gray[p] = gray;
+    CHECK(i < 64 && host::instances[i]);
+    auto &instance = *host::instances[i];
+    CHECK(p >= instance.commonOffset && p < instance.commonOffset + pop::NumParameters);
+    instance.gray[p - instance.commonOffset] = gray;
 }
 void NT_updateParameterDefinition(uint32_t i, uint32_t p) {
     CHECK(i < 64 && host::instances[i] && p < pop::NumParameters);
