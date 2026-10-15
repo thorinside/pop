@@ -22,13 +22,17 @@ $(BUILD)/clock_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugi
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_clock_test.cpp -o $@
 $(BUILD)/clock_boundaries_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_math.h tests/pop_clock_boundaries_test.cpp tests/check.h | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_clock_boundaries_test.cpp -o $@
+$(BUILD)/clock_math_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_math.h src/pop_clock_math.h tests/pop_clock_math_test.cpp tests/check.h | $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_clock_math_test.cpp -o $@
 $(BUILD)/clock_corrections_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_clock_corrections_test.cpp tests/check.h | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_clock_corrections_test.cpp -o $@
-clock-test: $(BUILD)/clock_test $(BUILD)/clock_boundaries_test $(BUILD)/clock_corrections_test
+clock-test: $(BUILD)/clock_test $(BUILD)/clock_boundaries_test $(BUILD)/clock_corrections_test $(BUILD)/clock_math_test
+	python3 tests/clock_math_reference.py $(BUILD)/clock_math_test
 	$(BUILD)/clock_test
 	$(BUILD)/clock_boundaries_test
 	$(BUILD)/clock_corrections_test
-test: $(BUILD)/engine_test $(BUILD)/adapter_test $(BUILD)/rates_test $(BUILD)/sample_math_test $(BUILD)/regressions_test $(BUILD)/clock_test $(BUILD)/clock_boundaries_test $(BUILD)/clock_corrections_test
+test: $(BUILD)/engine_test $(BUILD)/adapter_test $(BUILD)/rates_test $(BUILD)/sample_math_test $(BUILD)/regressions_test $(BUILD)/clock_test $(BUILD)/clock_boundaries_test $(BUILD)/clock_corrections_test $(BUILD)/clock_math_test
+	python3 tests/clock_math_reference.py $(BUILD)/clock_math_test
 	$(BUILD)/clock_corrections_test
 	$(BUILD)/clock_test
 	$(BUILD)/clock_boundaries_test
@@ -55,7 +59,7 @@ $(BUILD)/perf: $(SRC) src/pop_sample_math.h tests/nt_host_driver.cpp tests/nt_ho
 perf: $(BUILD)/perf
 	$(BUILD)/perf
 ARMFLAGS := -std=c++17 -Os $(WARN) -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -fPIC -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -ffp-contract=off
-$(BUILD)/arm/%.o: src/%.cpp src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h
+$(BUILD)/arm/%.o: src/%.cpp src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h src/pop_clock_math.h
 	mkdir -p $(@D)
 	$(ARM_CXX) $(CPPFLAGS) $(ARMFLAGS) -c $< -o $@
 $(BUILD)/pop.o: $(BUILD)/arm/pop_engine.o $(BUILD)/arm/pop_plugin.o
@@ -76,7 +80,7 @@ ifeq ($(shell uname -s),Darwin)
 else
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -shared $(SRC) -o $(BUILD)/pop.so
 endif
-$(BUILD)/compile_commands.json: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h Makefile | $(BUILD)
+$(BUILD)/compile_commands.json: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h src/pop_clock_math.h Makefile | $(BUILD)
 	$(ANALYSIS_CXX) $(CPPFLAGS) $(CXXFLAGS) -MJ $(BUILD)/engine-command.json -c src/pop_engine.cpp -o $(BUILD)/engine-analysis.o
 	$(ANALYSIS_CXX) $(CPPFLAGS) $(CXXFLAGS) -MJ $(BUILD)/plugin-command.json -c src/pop_plugin.cpp -o $(BUILD)/plugin-analysis.o
 	python3 -c 'import json,pathlib; p=pathlib.Path("$(BUILD)"); (p/"compile_commands.json").write_text(json.dumps([json.loads((p/n).read_text().strip().rstrip(",")) for n in ["engine-command.json","plugin-command.json"]],indent=2))'
@@ -92,3 +96,4 @@ release-package: hardware manual
 	python3 tools/package.py --build $(BUILD) --output $(BUILD)/release --require-pdf
 fixtures-check:
 	shasum -a 256 -c tests/fixtures/SHA256SUMS
+$(addprefix $(BUILD)/,engine_test sample_math_test regressions_test clock_test clock_boundaries_test clock_corrections_test clock_math_test adapter_test rates_test perf): $(wildcard src/*.h)

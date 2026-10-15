@@ -230,6 +230,7 @@ bool draw(_NT_algorithm *self) {
         status = "Active";
         break;
     case Phase::Draining:
+    case Phase::FinalDraining:
     case Phase::AbortedDraining:
         status = "Draining";
         break;

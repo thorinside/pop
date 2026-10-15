@@ -1,5 +1,6 @@
 #include "pop_engine.h"
 #include "pop_sample_math.h"
+#include "pop_clock_math.h"
 #include <cmath>
 
 namespace pop {
@@ -66,12 +67,13 @@ bool ClockTracker::observe(uint64_t now, uint32_t fs) {
     state = State::Locked;
     return false;
 }
-ClockWait clockWait(double length, uint64_t period, uint64_t ticks, uint64_t previousOffset,
-                    bool onset, uint32_t width, uint32_t gap, uint8_t &limits) {
+namespace {
+template <typename Exceeds>
+ClockWait selectClockWait(Exceeds exceeds, uint64_t period, uint64_t ticks, uint64_t previousOffset,
+                          bool onset, uint32_t width, uint32_t gap, uint8_t &limits) {
     for (unsigned shift = 0; shift < 12; ++shift) {
         const uint64_t increment = uint64_t{1} << shift;
-        // Division by 16 is exact in binary64. Selection never uses ceil(length).
-        if (sampleCountAsDouble(period << shift) / 16.0 < length)
+        if (exceeds(period << shift))
             continue;
         const uint64_t next = ticks + increment;
         const uint64_t offset = (next * period + 15) >> 4;
@@ -82,6 +84,17 @@ ClockWait clockWait(double length, uint64_t period, uint64_t ticks, uint64_t pre
     }
     // The fixed set covers valid P >= ceil(0.05 Fs), L <= 4 Fs and W+G.
     return {ticks, previousOffset};
+}
+} // namespace
+ClockWait clockWait(double length, uint64_t period, uint64_t ticks, uint64_t previousOffset,
+                    bool onset, uint32_t width, uint32_t gap, uint8_t &limits) {
+    return selectClockWait([length](uint64_t product) { return sampleCountAsDouble(product) / 16.0 < length; },
+                           period, ticks, previousOffset, onset, width, gap, limits);
+}
+ClockWait clockWait(const ClockLength &length, uint64_t period, uint64_t ticks, uint64_t previousOffset,
+                    bool onset, uint32_t width, uint32_t gap, uint8_t &limits) {
+    return selectClockWait([&length](uint64_t product) { return length.exceeds(product); },
+                           period, ticks, previousOffset, onset, width, gap, limits);
 }
 bool valid(const Settings &s) {
     return (s.termination == Termination::Count || s.termination == Termination::Duration) &&
@@ -134,7 +147,8 @@ void Engine::accept(const Settings &settings) {
     requestSample_ = now_;
 }
 void Engine::abortClock() {
-    if (phase_ == Phase::Generating && snapshot_.timing == Timing::Clock) {
+    if ((phase_ == Phase::Generating || (phase_ == Phase::FinalDraining && high())) &&
+        snapshot_.timing == Timing::Clock) {
         dueValid_ = false;
         phase_ = high() ? Phase::AbortedDraining : Phase::Idle;
         error_ = Error::ClockStopped;
@@ -161,41 +175,45 @@ void Engine::schedule(bool onset) {
     } else if (snapshot_.count > 2) {
         u = static_cast<double>(emitted_) / static_cast<double>(snapshot_.count - 1);
     }
-    double base = snapshot_.timing == Timing::Clock
-        ? sampleCountAsDouble(period_) * std::exp2(-snapshot_.clockRate) / static_cast<double>(fs_)
-        : 10.0 / static_cast<double>(snapshot_.rateTenths);
-    if (base < 0.010) {
-        base = 0.010;
-        limits_ |= BaseLimited;
-    }
-    if (base > 1.000) {
-        base = 1.000;
-        limits_ |= BaseLimited;
-    }
     generationRng_ = advance(generationRng_);
     ++draws_;
     const double r = static_cast<double>(generationRng_ >> 8) / 16777216.0;
     const double scale =
         std::exp2((snapshot_.amount / 100.0) * contourHeight(snapshot_.contour, u));
     const double jitter = 1.0 + 0.75 * (snapshot_.irregularity / 100.0) * (2.0 * r - 1.0);
-    // Preserve unclamped Clock algebra exactly, avoiding P/Fs*Fs roundoff.
-    const double baseSamples = snapshot_.timing == Timing::Clock && !(limits_ & BaseLimited)
-        ? sampleCountAsDouble(period_) * std::exp2(-snapshot_.clockRate)
-        : static_cast<double>(fs_) * base;
-    double length = baseSamples * scale * jitter;
-    if (length < 1.0) {
-        length = 1.0;
-        limits_ |= DurationLimited;
-    }
-    if (length > 4.0 * fs_) {
-        length = 4.0 * fs_;
-        limits_ |= DurationLimited;
-    }
     if (snapshot_.timing == Timing::Clock) {
+        uint64_t baseNumerator = period_;
+        uint32_t baseDenominator = 1;
+        if (snapshot_.clockRate < 0)
+            baseNumerator <<= static_cast<unsigned>(-snapshot_.clockRate);
+        else
+            baseDenominator <<= static_cast<unsigned>(snapshot_.clockRate);
+        if (baseNumerator * 100 < static_cast<uint64_t>(fs_) * baseDenominator) {
+            baseNumerator = fs_;
+            baseDenominator = 100;
+            limits_ |= BaseLimited;
+        } else if (baseNumerator > static_cast<uint64_t>(fs_) * baseDenominator) {
+            baseNumerator = fs_;
+            baseDenominator = 1;
+            limits_ |= BaseLimited;
+        }
+        auto length = ClockLength::fromBase(baseNumerator, baseDenominator, scale,
+                                             snapshot_.irregularity, generationRng_ >> 8);
+        length.clamp(fs_, limits_);
         const auto wait = clockWait(length, period_, ticks_, now_ - activation_, onset, width_, gap_, limits_);
         ticks_ = wait.ticks;
         due_ = activation_ + wait.offset;
     } else {
+        const double base = 10.0 / static_cast<double>(snapshot_.rateTenths);
+        double length = static_cast<double>(fs_) * base * scale * jitter;
+        if (length < 1.0) {
+            length = 1.0;
+            limits_ |= DurationLimited;
+        }
+        if (length > 4.0 * fs_) {
+            length = 4.0 * fs_;
+            limits_ |= DurationLimited;
+        }
         due_ = now_ + internalGap(length, onset, width_, gap_, limits_);
     }
     dueValid_ = snapshot_.termination == Termination::Count || due_ < deadline_;
@@ -218,9 +236,9 @@ Output Engine::tick(const Settings &current, bool retrigger, Events events) {
         if (phase_ == Phase::Generating && snapshot_.termination == Termination::Duration &&
             now_ >= deadline_) {
             dueValid_ = false;
-            phase_ = high() ? Phase::Draining : Phase::Idle;
+            phase_ = high() ? Phase::FinalDraining : Phase::Idle;
         }
-        if ((phase_ == Phase::Draining || phase_ == Phase::AbortedDraining) && !high())
+        if ((phase_ == Phase::Draining || phase_ == Phase::FinalDraining || phase_ == Phase::AbortedDraining) && !high())
             phase_ = Phase::Idle;
         if (events.clock && tracker_.observe(now_, fs_))
             abortClock();
@@ -244,14 +262,14 @@ Output Engine::tick(const Settings &current, bool retrigger, Events events) {
             if (snapshot_.termination == Termination::Count &&
                 emitted_ == static_cast<uint32_t>(snapshot_.count)) {
                 dueValid_ = false;
-                phase_ = Phase::Draining;
+                phase_ = Phase::FinalDraining;
             } else
                 schedule(false);
         }
     }
     const bool burst = high();
     const bool active = phase_ == Phase::Generating ||
-                        ((phase_ == Phase::Pending || phase_ == Phase::Draining) && burst && musicalHigh_);
+                        ((phase_ == Phase::Pending || phase_ == Phase::Draining || phase_ == Phase::FinalDraining) && burst && musicalHigh_);
     ++now_;
     return {burst, active};
 }

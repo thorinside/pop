@@ -2,7 +2,7 @@
 
 A brief disturbance in time. Pop turns a trigger into a finite burst of gates for the Expert Sleepers disting NT. Choose an exact Count, or a Duration window whose event count can vary. Contours and irregularity shape the spacing, not the gate voltage.
 
-**v0.1.0-beta.1 development candidate. Not a published or physically qualified release.** Internal and Clock Count/Duration are implemented. Shaped Clock host/ARM numerical equivalence and complete final qualification remain open. Do not tag or publish this candidate until the required proof, independent review and acceptance pass.
+**v0.1.0-beta.1 is an experimental prerelease version, not physical qualification.** Internal and Clock Count/Duration are implemented. Shaped Clock host/Cortex-M/firmware `exp2` subdivision equivalence remains **UNVERIFIED**. Physical AC-08/AC-09 remain operator-owned and not run. Release-candidate review, acceptance and verified publication are separate gates; an unavailable emulator alone is not a release veto under the owner's experimental-risk disposition.
 
 ## Four taps
 

@@ -5,7 +5,7 @@ namespace pop {
 enum class Termination : uint8_t { Count, Duration, Invalid = 255 };
 enum class Timing : uint8_t { Internal, Clock };
 enum class Contour : uint8_t { Flat, Acceleration, Deceleration, RiseFall, FallRise, Invalid = 255 };
-enum class Phase : uint8_t { Idle, Pending, Generating, Draining, AbortedDraining };
+enum class Phase : uint8_t { Idle, Pending, Generating, Draining, AbortedDraining, FinalDraining };
 enum Limit : uint8_t { BaseLimited = 1, DurationLimited = 2, PhysicalLimited = 4 };
 enum class Error : uint8_t { None, InvalidSettings, InvalidRouting, NoClock, ClockStopped, ClockTimeout };
 struct Settings {

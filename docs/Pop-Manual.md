@@ -4,7 +4,7 @@ subtitle: A Brief Disturbance in Time
 lang: en-GB
 ---
 
-> **v0.1.0-beta.1 candidate. Not yet a published or physically qualified release.** Native Clock behavior is implemented. Host/ARM shaped-Clock numeric equivalence, complete final qualification and publication remain open. Do not infer those results from this manual.
+> **v0.1.0-beta.1 experimental prerelease guide.** Internal and Clock Count/Duration are implemented. Host/Cortex-M/firmware shaped-Clock numerical equivalence remains **UNVERIFIED**. Physical loader, electrical, lifecycle, resource and musical qualification remain operator-owned and not run for this candidate. The guide is not evidence that a release was published or that those checks passed. Use only assets from the intended verified GitHub release.
 
 Pop makes finite bursts of gates for the Expert Sleepers disting NT: four tidy taps, an accelerating rattle, a small shower of events, or something that appears to have escaped a balloon with a timetable.
 
