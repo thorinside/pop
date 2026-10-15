@@ -1,0 +1,62 @@
+CXX := clang++
+ARM_CXX ?= arm-none-eabi-g++
+ARM_PREFIX ?= arm-none-eabi-
+CLANG_TIDY ?= $(shell command -v clang-tidy 2>/dev/null || printf /opt/homebrew/opt/llvm/bin/clang-tidy)
+ANALYSIS_CXX ?= $(dir $(CLANG_TIDY))clang++
+BUILD ?= build
+CPPFLAGS := -Isrc -IdistingNT_API/include -Itests
+WARN := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow
+CXXFLAGS := -std=c++17 -O2 $(WARN) -fno-exceptions -fno-rtti -ffp-contract=off
+SRC := src/pop_engine.cpp src/pop_plugin.cpp
+TESTFLAGS := -DPOP_TESTING
+.PHONY: test sanitize hardware inspect desktop analyze live perf fixtures-check
+$(BUILD):
+	mkdir -p $@
+$(BUILD)/engine_test: src/pop_engine.cpp src/pop_engine.h tests/pop_engine_test.cpp tests/check.h tests/fixtures/internal.h | $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_engine_test.cpp -o $@
+test: $(BUILD)/engine_test $(BUILD)/adapter_test $(BUILD)/rates_test
+	$(BUILD)/engine_test
+	$(BUILD)/adapter_test
+	$(BUILD)/rates_test
+sanitize:
+	$(MAKE) BUILD=build/sanitize CXXFLAGS='-std=c++17 -O1 -g $(WARN) -fno-exceptions -fno-rtti -ffp-contract=off -fsanitize=address,undefined -fno-omit-frame-pointer' test
+$(BUILD)/adapter_test: $(SRC) src/pop_engine.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_adapter_test.cpp tests/check.h tests/fixtures/internal.h | $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_adapter_test.cpp -o $@
+$(BUILD)/rates_test: $(SRC) src/pop_engine.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_rates_test.cpp tests/check.h | $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_rates_test.cpp -o $@
+live: $(BUILD)/adapter_test $(BUILD)/rates_test
+	$(BUILD)/adapter_test
+	$(BUILD)/rates_test
+$(BUILD)/perf: $(SRC) tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_perf.cpp | $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_perf.cpp -o $@
+perf: $(BUILD)/perf
+	$(BUILD)/perf
+ARMFLAGS := -std=c++17 -Os $(WARN) -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -fPIC -fno-exceptions -fno-rtti -fno-unwind-tables -fno-asynchronous-unwind-tables -ffp-contract=off
+$(BUILD)/arm/%.o: src/%.cpp src/pop_engine.h src/pop_plugin.h
+	mkdir -p $(@D)
+	$(ARM_CXX) $(CPPFLAGS) $(ARMFLAGS) -c $< -o $@
+$(BUILD)/pop.o: $(BUILD)/arm/pop_engine.o $(BUILD)/arm/pop_plugin.o
+	$(ARM_CXX) -nostdlib -r $^ -o $@
+hardware: $(BUILD)/pop.o
+inspect: hardware
+	$(ARM_PREFIX)readelf -h -S $(BUILD)/pop.o
+	$(ARM_PREFIX)size -A $(BUILD)/pop.o
+	$(ARM_PREFIX)nm -S --size-sort -C $(BUILD)/pop.o
+	$(ARM_PREFIX)nm -u -C $(BUILD)/pop.o
+	$(ARM_PREFIX)nm -g $(BUILD)/pop.o | grep ' T pluginEntry$$'
+desktop: | $(BUILD)
+ifeq ($(shell uname -s),Darwin)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -dynamiclib -undefined dynamic_lookup $(SRC) -o $(BUILD)/pop.dylib
+else
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -shared $(SRC) -o $(BUILD)/pop.so
+endif
+$(BUILD)/compile_commands.json: $(SRC) src/pop_engine.h src/pop_plugin.h Makefile | $(BUILD)
+	$(ANALYSIS_CXX) $(CPPFLAGS) $(CXXFLAGS) -MJ $(BUILD)/engine-command.json -c src/pop_engine.cpp -o $(BUILD)/engine-analysis.o
+	$(ANALYSIS_CXX) $(CPPFLAGS) $(CXXFLAGS) -MJ $(BUILD)/plugin-command.json -c src/pop_plugin.cpp -o $(BUILD)/plugin-analysis.o
+	python3 -c 'import json,pathlib; p=pathlib.Path("$(BUILD)"); (p/"compile_commands.json").write_text(json.dumps([json.loads((p/n).read_text().strip().rstrip(",")) for n in ["engine-command.json","plugin-command.json"]],indent=2))'
+analyze: $(BUILD)/compile_commands.json
+	cppcheck --enable=warning,style,performance,portability --std=c++17 --inline-suppr --suppress=missingIncludeSystem --suppress=noExplicitConstructor:distingNT_API/include/distingnt/serialisation.h --error-exitcode=1 -Isrc -IdistingNT_API/include src
+	$(CXX) $(CPPFLAGS) -std=c++17 --analyze $(SRC) -Xanalyzer -analyzer-output=text
+	$(CLANG_TIDY) -p $(BUILD) --config='{Checks: "-*,clang-analyzer-*,performance-*", HeaderFilterRegex: "(^|/)src/", SystemHeaders: false}' --warnings-as-errors='*' $(SRC)
+fixtures-check:
+	shasum -a 256 tests/fixtures/reference.py tests/fixtures/internal.json tests/fixtures/internal.h
