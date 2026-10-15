@@ -9,7 +9,7 @@ WARN := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow
 CXXFLAGS := -std=c++17 -O2 $(WARN) -fno-exceptions -fno-rtti -ffp-contract=off
 SRC := src/pop_engine.cpp src/pop_plugin.cpp
 TESTFLAGS := -DPOP_TESTING
-.PHONY: test sanitize hardware inspect desktop analyze live perf fixtures-check
+.PHONY: test sanitize hardware imports-check inspect desktop analyze live perf fixtures-check
 $(BUILD):
 	mkdir -p $@
 $(BUILD)/engine_test: src/pop_engine.cpp src/pop_engine.h tests/pop_engine_test.cpp tests/check.h tests/fixtures/internal.h | $(BUILD)
@@ -37,7 +37,9 @@ $(BUILD)/arm/%.o: src/%.cpp src/pop_engine.h src/pop_plugin.h
 	$(ARM_CXX) $(CPPFLAGS) $(ARMFLAGS) -c $< -o $@
 $(BUILD)/pop.o: $(BUILD)/arm/pop_engine.o $(BUILD)/arm/pop_plugin.o
 	$(ARM_CXX) -nostdlib -r $^ -o $@
-hardware: $(BUILD)/pop.o
+hardware: $(BUILD)/pop.o imports-check
+imports-check: $(BUILD)/pop.o
+	python3 tests/check_arm_imports.py --nm $(ARM_PREFIX)nm $(BUILD)/pop.o
 inspect: hardware
 	$(ARM_PREFIX)readelf -h -S $(BUILD)/pop.o
 	$(ARM_PREFIX)size -A $(BUILD)/pop.o

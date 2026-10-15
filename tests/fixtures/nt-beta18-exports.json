@@ -1,0 +1,602 @@
+{
+  "imageSha256": "5c354798f2774cf4deb939e603a70f63a1b8a9f73d5e1c1d897f6ce009a3463b",
+  "archive": "NT_1.19beta_18.zip",
+  "archiveMember": "bootable_images/disting_NT.bin",
+  "provenance": "Existing user Downloads archive; offline candidate image, not authenticated download or flashed-firmware identity. Independently parsed exact contiguous pointer/address function table and loader initialization disassembly.",
+  "mappedImageBase": "0x60001000",
+  "tableStartOffset": "0x15d718",
+  "tableEndOffset": "0x15daa8",
+  "functions": [
+    {
+      "name": "memset",
+      "address": "0x601138b9",
+      "entryOffset": "0x15d718"
+    },
+    {
+      "name": "memcpy",
+      "address": "0x60113815",
+      "entryOffset": "0x15d720"
+    },
+    {
+      "name": "memmove",
+      "address": "0x600d80c5",
+      "entryOffset": "0x15d728"
+    },
+    {
+      "name": "rand",
+      "address": "0x600d8069",
+      "entryOffset": "0x15d730"
+    },
+    {
+      "name": "srand",
+      "address": "0x600db3d9",
+      "entryOffset": "0x15d738"
+    },
+    {
+      "name": "tanf",
+      "address": "0x600db42d",
+      "entryOffset": "0x15d740"
+    },
+    {
+      "name": "tanhf",
+      "address": "0x600195c9",
+      "entryOffset": "0x15d748"
+    },
+    {
+      "name": "powf",
+      "address": "0x600da641",
+      "entryOffset": "0x15d750"
+    },
+    {
+      "name": "expf",
+      "address": "0x600da729",
+      "entryOffset": "0x15d758"
+    },
+    {
+      "name": "exp2f",
+      "address": "0x600dad75",
+      "entryOffset": "0x15d760"
+    },
+    {
+      "name": "expm1f",
+      "address": "0x600da855",
+      "entryOffset": "0x15d768"
+    },
+    {
+      "name": "logf",
+      "address": "0x600daba9",
+      "entryOffset": "0x15d770"
+    },
+    {
+      "name": "log10f",
+      "address": "0x600db1a5",
+      "entryOffset": "0x15d778"
+    },
+    {
+      "name": "log1pf",
+      "address": "0x60019911",
+      "entryOffset": "0x15d780"
+    },
+    {
+      "name": "sinf",
+      "address": "0x60019af1",
+      "entryOffset": "0x15d788"
+    },
+    {
+      "name": "cosf",
+      "address": "0x600da5e9",
+      "entryOffset": "0x15d790"
+    },
+    {
+      "name": "asinf",
+      "address": "0x600da591",
+      "entryOffset": "0x15d798"
+    },
+    {
+      "name": "acosf",
+      "address": "0x600dac09",
+      "entryOffset": "0x15d7a0"
+    },
+    {
+      "name": "sinhf",
+      "address": "0x600da7f9",
+      "entryOffset": "0x15d7a8"
+    },
+    {
+      "name": "coshf",
+      "address": "0x600dafe1",
+      "entryOffset": "0x15d7b0"
+    },
+    {
+      "name": "atanf",
+      "address": "0x600da725",
+      "entryOffset": "0x15d7b8"
+    },
+    {
+      "name": "atan2f",
+      "address": "0x600dac65",
+      "entryOffset": "0x15d7c0"
+    },
+    {
+      "name": "sqrtf",
+      "address": "0x600daca9",
+      "entryOffset": "0x15d7c8"
+    },
+    {
+      "name": "cbrtf",
+      "address": "0x600d8bb5",
+      "entryOffset": "0x15d7d0"
+    },
+    {
+      "name": "frexpf",
+      "address": "0x600da91d",
+      "entryOffset": "0x15d7d8"
+    },
+    {
+      "name": "fmodf",
+      "address": "0x6001ad09",
+      "entryOffset": "0x15d7e0"
+    },
+    {
+      "name": "tan",
+      "address": "0x600db525",
+      "entryOffset": "0x15d7e8"
+    },
+    {
+      "name": "tanh",
+      "address": "0x6001a3e1",
+      "entryOffset": "0x15d7f0"
+    },
+    {
+      "name": "pow",
+      "address": "0x60018df1",
+      "entryOffset": "0x15d7f8"
+    },
+    {
+      "name": "exp",
+      "address": "0x60018fa9",
+      "entryOffset": "0x15d800"
+    },
+    {
+      "name": "exp2",
+      "address": "0x6001aeb1",
+      "entryOffset": "0x15d808"
+    },
+    {
+      "name": "expm1",
+      "address": "0x600191e1",
+      "entryOffset": "0x15d810"
+    },
+    {
+      "name": "log",
+      "address": "0x6001b3c1",
+      "entryOffset": "0x15d818"
+    },
+    {
+      "name": "log1p",
+      "address": "0x6001ac89",
+      "entryOffset": "0x15d820"
+    },
+    {
+      "name": "sin",
+      "address": "0x6001ac09",
+      "entryOffset": "0x15d828"
+    },
+    {
+      "name": "cos",
+      "address": "0x600da965",
+      "entryOffset": "0x15d830"
+    },
+    {
+      "name": "asin",
+      "address": "0x600da539",
+      "entryOffset": "0x15d838"
+    },
+    {
+      "name": "acos",
+      "address": "0x6001a379",
+      "entryOffset": "0x15d840"
+    },
+    {
+      "name": "sinh",
+      "address": "0x60018d89",
+      "entryOffset": "0x15d848"
+    },
+    {
+      "name": "cosh",
+      "address": "0x6001aa01",
+      "entryOffset": "0x15d850"
+    },
+    {
+      "name": "atan",
+      "address": "0x600da9bd",
+      "entryOffset": "0x15d858"
+    },
+    {
+      "name": "atan2",
+      "address": "0x6001a9b9",
+      "entryOffset": "0x15d860"
+    },
+    {
+      "name": "sqrt",
+      "address": "0x6001ad69",
+      "entryOffset": "0x15d868"
+    },
+    {
+      "name": "cbrt",
+      "address": "0x601138e5",
+      "entryOffset": "0x15d870"
+    },
+    {
+      "name": "strcmp",
+      "address": "0x601138f9",
+      "entryOffset": "0x15d878"
+    },
+    {
+      "name": "strcpy",
+      "address": "0x60113723",
+      "entryOffset": "0x15d880"
+    },
+    {
+      "name": "strncpy",
+      "address": "0x6011369d",
+      "entryOffset": "0x15d888"
+    },
+    {
+      "name": "strcat",
+      "address": "0x601136d9",
+      "entryOffset": "0x15d890"
+    },
+    {
+      "name": "strncat",
+      "address": "0x601138d5",
+      "entryOffset": "0x15d898"
+    },
+    {
+      "name": "strlen",
+      "address": "0x600d7fd5",
+      "entryOffset": "0x15d8a0"
+    },
+    {
+      "name": "sprintf",
+      "address": "0x600d7f55",
+      "entryOffset": "0x15d8a8"
+    },
+    {
+      "name": "snprintf",
+      "address": "0x6006f521",
+      "entryOffset": "0x15d8b0"
+    },
+    {
+      "name": "NT_setParameterRange",
+      "address": "0x600facdf",
+      "entryOffset": "0x15d8b8"
+    },
+    {
+      "name": "NT_drawText",
+      "address": "0x6006f6a9",
+      "entryOffset": "0x15d8c0"
+    },
+    {
+      "name": "NT_drawShapeI",
+      "address": "0x6006f6f9",
+      "entryOffset": "0x15d8c8"
+    },
+    {
+      "name": "NT_drawShapeF",
+      "address": "0x2165",
+      "entryOffset": "0x15d8d0"
+    },
+    {
+      "name": "NT_intToString",
+      "address": "0x6006f8e9",
+      "entryOffset": "0x15d8d8"
+    },
+    {
+      "name": "NT_floatToString",
+      "address": "0x2169",
+      "entryOffset": "0x15d8e0"
+    },
+    {
+      "name": "NT_sendMidiByte",
+      "address": "0x2173",
+      "entryOffset": "0x15d8e8"
+    },
+    {
+      "name": "NT_sendMidi2ByteMessage",
+      "address": "0x2181",
+      "entryOffset": "0x15d8f0"
+    },
+    {
+      "name": "NT_sendMidi3ByteMessage",
+      "address": "0x2197",
+      "entryOffset": "0x15d8f8"
+    },
+    {
+      "name": "NT_sendMidiSysEx",
+      "address": "0x2119",
+      "entryOffset": "0x15d900"
+    },
+    {
+      "name": "NT_getCpuCycleCount",
+      "address": "0x6006f609",
+      "entryOffset": "0x15d908"
+    },
+    {
+      "name": "NT_algorithmIndex",
+      "address": "0x2125",
+      "entryOffset": "0x15d910"
+    },
+    {
+      "name": "NT_algorithmCount",
+      "address": "0x6006f64d",
+      "entryOffset": "0x15d918"
+    },
+    {
+      "name": "NT_getSlot",
+      "address": "0x6006f8bd",
+      "entryOffset": "0x15d920"
+    },
+    {
+      "name": "NT_setParameterFromAudio",
+      "address": "0x6006f929",
+      "entryOffset": "0x15d928"
+    },
+    {
+      "name": "NT_setParameterFromUi",
+      "address": "0x6006fa2d",
+      "entryOffset": "0x15d930"
+    },
+    {
+      "name": "NT_updateParameterDefinition",
+      "address": "0x2131",
+      "entryOffset": "0x15d938"
+    },
+    {
+      "name": "NT_parameterOffset",
+      "address": "0x6006fa85",
+      "entryOffset": "0x15d940"
+    },
+    {
+      "name": "NT_setParameterGrayedOut",
+      "address": "0x6006f93d",
+      "entryOffset": "0x15d948"
+    },
+    {
+      "name": "NT_updateParameterPages",
+      "address": "0x60071065",
+      "entryOffset": "0x15d950"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream9openArrayEv",
+      "address": "0x6007108d",
+      "entryOffset": "0x15d958"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream10closeArrayEv",
+      "address": "0x600710a5",
+      "entryOffset": "0x15d960"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream10openObjectEv",
+      "address": "0x600710d1",
+      "entryOffset": "0x15d968"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream11closeObjectEv",
+      "address": "0x600710f9",
+      "entryOffset": "0x15d970"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream13addMemberNameEPKc",
+      "address": "0x600fafe5",
+      "entryOffset": "0x15d978"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream9addNumberEi",
+      "address": "0x6007113d",
+      "entryOffset": "0x15d980"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream9addNumberEf",
+      "address": "0x600fb007",
+      "entryOffset": "0x15d988"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream9addStringEPKc",
+      "address": "0x600fb049",
+      "entryOffset": "0x15d990"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream9addFourCCEm",
+      "address": "0x60071175",
+      "entryOffset": "0x15d998"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream10addBooleanEb",
+      "address": "0x6007119d",
+      "entryOffset": "0x15d9a0"
+    },
+    {
+      "name": "_ZN14_NT_jsonStream7addNullEv",
+      "address": "0x600fb05b",
+      "entryOffset": "0x15d9a8"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse21numberOfArrayElementsERi",
+      "address": "0x600fb081",
+      "entryOffset": "0x15d9b0"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse21numberOfObjectMembersERi",
+      "address": "0x600fb0a7",
+      "entryOffset": "0x15d9b8"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse9matchNameEPKc",
+      "address": "0x600fb0c7",
+      "entryOffset": "0x15d9c0"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse10skipMemberEv",
+      "address": "0x600fb0d5",
+      "entryOffset": "0x15d9c8"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse6numberERi",
+      "address": "0x600fb0f5",
+      "entryOffset": "0x15d9d0"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse6numberERf",
+      "address": "0x600fb115",
+      "entryOffset": "0x15d9d8"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse6stringERPKc",
+      "address": "0x600fb13d",
+      "entryOffset": "0x15d9e0"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse7booleanERb",
+      "address": "0x600fb17b",
+      "entryOffset": "0x15d9e8"
+    },
+    {
+      "name": "_ZN13_NT_jsonParse4nullEv",
+      "address": "0x600faf19",
+      "entryOffset": "0x15d9f0"
+    },
+    {
+      "name": "_ZNK8_NT_slot4nameEv",
+      "address": "0x600faf21",
+      "entryOffset": "0x15d9f8"
+    },
+    {
+      "name": "_ZNK8_NT_slot4guidEv",
+      "address": "0x600faf35",
+      "entryOffset": "0x15da00"
+    },
+    {
+      "name": "_ZNK8_NT_slot6pluginEv",
+      "address": "0x600faf51",
+      "entryOffset": "0x15da08"
+    },
+    {
+      "name": "_ZNK8_NT_slot13numParametersEv",
+      "address": "0x600faf57",
+      "entryOffset": "0x15da10"
+    },
+    {
+      "name": "_ZNK8_NT_slot13parameterInfoER13_NT_parameterm",
+      "address": "0x600faf97",
+      "entryOffset": "0x15da18"
+    },
+    {
+      "name": "_ZNK8_NT_slot20parameterPresetValueEm",
+      "address": "0x600fafad",
+      "entryOffset": "0x15da20"
+    },
+    {
+      "name": "_ZNK8_NT_slot14parameterValueEm",
+      "address": "0x600fafbf",
+      "entryOffset": "0x15da28"
+    },
+    {
+      "name": "_ZNK8_NT_slot15parameterStringEmPc",
+      "address": "0x2135",
+      "entryOffset": "0x15da30"
+    },
+    {
+      "name": "NT_isSdCardMounted",
+      "address": "0x2141",
+      "entryOffset": "0x15da38"
+    },
+    {
+      "name": "NT_getNumSampleFolders",
+      "address": "0x6006faad",
+      "entryOffset": "0x15da40"
+    },
+    {
+      "name": "NT_getSampleFolderInfo",
+      "address": "0x6006fad9",
+      "entryOffset": "0x15da48"
+    },
+    {
+      "name": "NT_getSampleFileInfo",
+      "address": "0x6006f975",
+      "entryOffset": "0x15da50"
+    },
+    {
+      "name": "NT_readSampleFrames",
+      "address": "0x214d",
+      "entryOffset": "0x15da58"
+    },
+    {
+      "name": "NT_getNumWavetables",
+      "address": "0x6006f66d",
+      "entryOffset": "0x15da60"
+    },
+    {
+      "name": "NT_getWavetableInfo",
+      "address": "0x6006f9bd",
+      "entryOffset": "0x15da68"
+    },
+    {
+      "name": "NT_readWavetable",
+      "address": "0x60008721",
+      "entryOffset": "0x15da70"
+    },
+    {
+      "name": "NT_evaluateWavetable",
+      "address": "0x6005ab7d",
+      "entryOffset": "0x15da78"
+    },
+    {
+      "name": "NT_streamOpen",
+      "address": "0x600f3463",
+      "entryOffset": "0x15da80"
+    },
+    {
+      "name": "NT_streamRender",
+      "address": "0x2159",
+      "entryOffset": "0x15da88"
+    },
+    {
+      "name": "NT_getNumScl",
+      "address": "0x6006f68d",
+      "entryOffset": "0x15da90"
+    },
+    {
+      "name": "NT_getSclInfo",
+      "address": "0x6006f9ed",
+      "entryOffset": "0x15da98"
+    },
+    {
+      "name": "NT_readScl",
+      "address": "0x34e8",
+      "entryOffset": "0x15daa0"
+    }
+  ],
+  "loaderSpecials": {
+    "_GLOBAL_OFFSET_TABLE_": {
+      "namePointerLiteral": "0x6f974",
+      "nameAddress": "0x60192349",
+      "initialization": "0x6007071c..0x60070730 stores name and value 0 in first loader symbol pair"
+    },
+    "NT_globals": {
+      "namePointerLiteral": "0x6f97c",
+      "nameAddress": "0x6019235f",
+      "initialization": "0x60070732..0x60070738 stores name and value 4 in second loader symbol pair; GOT symbol offsets, not standalone function addresses. Official api.h declares global host data."
+    }
+  },
+  "loaderEvidence": {
+    "imageOffsetStart": "0x6f70a",
+    "imageOffsetEnd": "0x6f744",
+    "initializationBytesHex": "386c0225d7f84880504438649548c850954b95495360954bc3f8a4140021c3f8a02403f2a4435960924999600421d9609149196101217b61b963",
+    "literalPoolOffset": "0x6f96c",
+    "literalPoolHex": "c89b0420a069002049231960a04a89815f2319606a231960",
+    "lookupDisassembly": "0x60070846 uses name pointer with stride8; 0x60070944..0x60070948 calls resolver for undefined symbol; inspect preserved disassembly and official API.",
+    "reviewAuditArtifactId": "64246073-36c3-4cad-89b4-7af288b3b23e"
+  }
+}
