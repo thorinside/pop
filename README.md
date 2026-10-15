@@ -1,32 +1,32 @@
 # Pop
 
-A brief disturbance in time. Pop turns a trigger into a finite burst of gates for the Expert Sleepers disting NT. Choose an exact Count, or a Duration window whose event count can vary. Contours and irregularity shape the spacing, not the gate voltage.
+Pop is a trigger-burst generator for the Expert Sleepers disting NT. One start produces several short trigger pulses for a drum, envelope or another trigger input. **It does not make audio.**
 
-**v0.1.0-beta.1 is an experimental prerelease version, not physical qualification.** Internal and Clock Count/Duration are implemented. Shaped Clock host/Cortex-M/firmware `exp2` subdivision equivalence remains **UNVERIFIED**. Physical AC-08/AC-09 remain operator-owned and not run. Release-candidate review, acceptance and verified publication are separate gates; an unavailable emulator alone is not a release veto under the owner's experimental-risk disposition.
+[Download v0.1.0-beta.1](https://github.com/thorinside/pop/releases/tag/v0.1.0-beta.1) · [User guide](docs/Pop-Manual.md) · [Manual PDF](https://github.com/thorinside/pop/releases/download/v0.1.0-beta.1/Pop-Manual-v0.1.0-beta.1.pdf)
 
-## Four taps
+The guide was rewritten on **15 October 2026**. It is a revised manual for the same plug-in release; the tag and binary assets have not changed.
 
-1. Keep Timing at Internal. Patch a trigger to Input 1 and Output 1 to a drum or envelope trigger input.
-2. Fresh instances use Count 4, Rate 20.0 Hz, Irregularity 0%, Flat and Contour amount 100%.
-3. Send a low, then a rising trigger. At 48 kHz the gates rise 50, 100, 150 and 200 ms after the accepted start. There is no immediate onset gate.
-4. For Manual Start, let Off be observed, then select Fire. Leaving Fire selected does not repeat.
+## First patch
 
-Burst defaults to Output 1, host bus 13. Active defaults to Output 2, bus 14. Both contribute 0 V or +5 V. Each high is 5 ms rounded up to whole samples. The low separation is at least 1 ms rounded up. Add mode adds only Pop's contribution, not a ceiling on the shared bus.
+1. Put `pop.o` at `/programs/plug-ins/pop.o` on the NT's MicroSD card, restart, and add a new Pop instance. Use a preset containing only Pop for the first test.
+2. Connect **NT Output 1** to a drum voice's **trigger input**. Connect the drum's audio output to your mixer or audio output.
+3. Keep the defaults: **Internal**, **Count 4**, **Rate 20.0 Hz**, **Irregularity 0%**, **Flat**, **Contour amount 100%**. Burst output is **Output 1**, NT bus **13**.
+4. On Burst, select **Manual Start: Off**, leave it briefly, then select **Fire**. You should hear four fast hits. Select Off before firing again.
 
-## Clock and trigger are different jobs
+If the hits blend together, set Rate to **5.0 Hz** to hear them separately. This manual test needs no input cable or external clock.
 
-Clock supplies timing. Trigger requests a finite burst. For a first patch, use a continuous clock on Input 1, a separate trigger on Input 2, Timing Clock, Clock input Input 1 and Trigger input Input 2. Try Count 4, Rate x4, Flat, Irregularity 0% and Retrigger Off.
+## External trigger and clock
 
-Two fresh clock edges establish a period. A request activates on an eligible strictly later edge, then waits its generated onset interval. Valid periods are 50 ms to 2 seconds. The activated burst holds its period despite valid tempo changes. Detected clock failure cancels future events and lowers Active immediately, while an existing Burst high drains. Recovery requires a fresh request.
+For an external start, patch a trigger to **Input 1** and select it as **Trigger input**. Keep Timing Internal until this works.
 
-Trigger and Clock may share an input. Use Retrigger Off to let a waiting request survive subsequent shared edges. With On, every shared edge can replace the pending request before activation, preventing output. This is deliberate replacement behavior.
+**Clock sets the speed; Trigger requests a burst.** For a first clocked patch, use a continuous clock on Input 1, select Timing Clock and Clock input Input 1, choose Trigger input None, and use Manual Start. The guide gives complete settings and explains the first-hit delay.
 
-## Manual and compatibility
+If Clock and Trigger share an input, use **Retrigger Off**. With On, repeated clock pulses can keep replacing the waiting request and prevent output.
 
-The [player manual](docs/Pop-Manual.md) covers every parameter, ranges, defaults, routing, shared inputs, contours, installation, troubleshooting and patch recipes. `make manual` renders a versioned PDF from that source with Pandoc and an isolated Chrome profile.
+## Controls and compatibility
 
-A verified release's installable object belongs at `/programs/plug-ins/pop.o`. Pop's identity is **ThPp**. Earlier ThPo development instances are a different identity and may need Pop re-added. Fresh defaults do not overwrite loaded parameter values.
+Count sets the number of hits. Duration sets a time window instead. Rate sets the starting spacing. Irregularity makes gaps less even. Contour changes speed through the burst; Contour amount sets the strength of that change. These controls change timing, not volume.
 
-The build uses the pinned official API v14. Minimum physical firmware compatibility, loader/View info, target resources/cycles, DAC/receiver behavior, host lifecycle and musical audition remain unverified. Native callback execution and ARM inspection are not physical evidence.
+This is an experimental API v14 plug-in. Physical module qualification and shaped Clock timing equivalence remain incomplete. Its identity is **ThPp**; old **ThPo** development instances may need Pop re-added. See the guide's compatibility section for details.
 
-See [development and verification](docs/development.md), the [claim audit](docs/FACT_CHECK.md), and the [operator qualification protocol](docs/target-qualification.md). No MIDI, endless cycle, forced onset, seed control or pattern bank is included.
+Developer information: [build and verification](docs/development.md), [claim audit](docs/FACT_CHECK.md), [target qualification](docs/target-qualification.md). `make manual` renders the PDF from the maintained Markdown and print stylesheet.

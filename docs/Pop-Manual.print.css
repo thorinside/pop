@@ -4,21 +4,22 @@
   @bottom-left { content: "Pop · User manual"; font: 8pt Arial, sans-serif; color: #657277; }
   @bottom-right { content: counter(page); font: 8pt Arial, sans-serif; color: #657277; }
 }
-html { color: #202c31; background: #fff; font: 10.5pt/1.48 Arial, Helvetica, sans-serif; }
+html { color: #202c31; background: #fff; font: 11pt/1.44 Arial, Helvetica, sans-serif; }
 body { max-width: 175mm; margin: 0 auto; }
-#title-block-header { margin: 38mm 0 28mm; padding: 0 0 12mm; border-bottom: 2pt solid #2a6667; }
-#title-block-header .title { margin: 0; font-size: 70pt; line-height: 1.05; letter-spacing: -3pt; color: #173f43; }
-#title-block-header .subtitle { margin: 8mm 0 2mm; font-size: 19pt; color: #3d6668; }
+#title-block-header { margin: 4mm 0 7mm; padding: 0 0 5mm; border-bottom: 1pt solid #2a6667; }
+#title-block-header .title { margin: 0; font-size: 36pt; line-height: 1.05; color: #173f43; }
+#title-block-header .subtitle { margin: 3mm 0 2mm; font-size: 16pt; color: #3d6668; }
 #title-block-header .date { font-size: 10pt; color: #627478; }
-nav#TOC { padding: 6mm 8mm; margin-bottom: 12mm; background: #f0f5f4; border-left: 3pt solid #2a6667; break-after: page; }
+nav#TOC { display: none; }
 nav#TOC a { color: #24585d; text-decoration: none; }
 nav#TOC ul { padding-left: 5mm; }
-h1 { font-size: 23pt; line-height: 1.16; margin: 12mm 0 5mm; color: #173f43; break-after: avoid; }
-h2 { font-size: 15pt; line-height: 1.24; margin: 8mm 0 3mm; color: #245c60; break-after: avoid; }
+h1 { font-size: 21pt; line-height: 1.16; margin: 9mm 0 4mm; color: #173f43; break-after: avoid; }
+h2 { font-size: 14pt; line-height: 1.24; margin: 6mm 0 3mm; color: #245c60; break-after: avoid; }
 h3 { font-size: 11.5pt; margin: 5mm 0 2mm; color: #245c60; break-after: avoid; }
 p, li { orphans: 3; widows: 3; }
 p { margin: 0 0 3mm; }
 ol, ul { padding-left: 6mm; margin-top: 2mm; margin-bottom: 4mm; }
+ol { break-inside: avoid; }
 li { padding-left: 1mm; margin-bottom: 1.5mm; }
 blockquote { margin: 5mm 0; padding: 4mm 5mm; background: #f0f5f4; border-left: 2pt solid #2a6667; color: #314b50; break-inside: avoid; }
 blockquote p:last-child { margin-bottom: 0; }
@@ -26,7 +27,7 @@ strong { color: #173f43; }
 code { font: 9.2pt/1.4 Menlo, Consolas, monospace; overflow-wrap: anywhere; }
 pre { padding: 4mm; border: 0.5pt solid #d2dedc; background: #f7f9f8; white-space: pre-wrap; break-inside: avoid; }
 a { color: #235f68; text-decoration-thickness: 0.4pt; overflow-wrap: anywhere; }
-table { border-collapse: collapse; width: 100%; margin: 4mm 0 6mm; font-size: 9.3pt; line-height: 1.35; }
+table { border-collapse: collapse; width: 100%; margin: 4mm 0 6mm; font-size: 10.1pt; line-height: 1.35; break-inside: avoid; }
 thead { display: table-header-group; }
 th { padding: 3mm 2.5mm; background: #e6efed; color: #173f43; font-weight: bold; text-align: left; border-bottom: 1pt solid #799e9d; }
 td { padding: 2.5mm; vertical-align: top; border-bottom: 0.5pt solid #d6e1df; }
@@ -35,4 +36,8 @@ th:first-child, td:first-child { width: 24%; }
 table tr:nth-child(even) td { background: #f7faf9; }
 hr { border: 0; border-top: 0.5pt solid #bccfcb; margin: 8mm 0; }
 img, svg { max-width: 100%; }
+#clock-setup { break-before: page; }
+#troubleshooting + p { break-after: avoid; }
+#troubleshooting + p + table { break-inside: auto; }
+#contour-and-contour-amount-changing-speed + p { break-after: avoid; }
 @media screen { body { padding: 12mm; } }

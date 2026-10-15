@@ -1,269 +1,249 @@
 ---
 title: Pop
-subtitle: A Brief Disturbance in Time
+subtitle: Trigger bursts for disting NT
 lang: en-GB
 ---
 
-> **v0.1.0-beta.1 experimental prerelease guide.** Internal and Clock Count/Duration are implemented. Host/Cortex-M/firmware shaped-Clock numerical equivalence remains **UNVERIFIED**. Physical loader, electrical, lifecycle, resource and musical qualification remain operator-owned and not run for this candidate. The guide is not evidence that a release was published or that those checks passed. Use only assets from the intended verified GitHub release.
+**User guide, revision 2 · 15 October 2026 · for Pop v0.1.0-beta.1.**
+This is a revised manual for the same plug-in. The plug-in has not changed.
 
-Pop makes finite bursts of gates for the Expert Sleepers disting NT: four tidy taps, an accelerating rattle, a small shower of events, or something that appears to have escaped a balloon with a timetable.
+# What Pop does
 
-It does not make an audio voice. Patch its **Burst output** to something that responds to triggers: a drum, an envelope, a switch, a sequencer, or another suitably excitable destination.
+Pop turns one start signal into several short trigger pulses. This group of pulses is called a **burst**. A **trigger pulse** is a brief voltage signal that tells another module to do something, such as play a drum sound or start an envelope. An external **clock** is a regular stream of pulses that can set the speed. Pop also works without one.
 
-# Four things that will happen
+**Pop does not make audio.** Connect its Burst output to a trigger input. Listen to the sound made by the module or patch receiving those triggers.
 
-Start here. No external clock is required.
+With the factory settings, one start produces **four evenly spaced triggers**. They are close together, so a drum plays a short roll. You can change the number of hits, their spacing and how regular that spacing is.
 
-1. Add **Pop** to the NT and leave **Timing** at **Internal**.
-2. Patch your trigger to **Input 1**. **Trigger input** defaults to Input 1.
-3. Patch **Output 1** to a drum or envelope trigger input. **Burst output** defaults to Output 1.
-4. Use the fresh-instance settings: **Termination: Count**, **Count: 4**, **Irregularity: 0%**, **Contour: Flat**, **Contour amount: 100%**.
-5. Send one trigger. It must first be low, then rise. You should get four evenly spaced output gates.
+# Installation
 
-The default Internal Rate is **20.0 Hz**. With those settings, the four rising edges occur **50, 100, 150 and 200 ms after the accepted start**. Each gate lasts 5 ms. Pop deliberately does **not** copy the incoming trigger to the output, so the first gate is not immediate.
+1. Download **pop.o** from the [Pop v0.1.0-beta.1 release](https://github.com/thorinside/pop/releases/tag/v0.1.0-beta.1). The PDF is the manual; the `.o` file is the plug-in.
+2. Put `pop.o` on the NT's MicroSD card at:
 
-For a manual test, use **Manual Start**: let the NT observe **Off**, then select **Fire**. Return it to Off before firing again. Leaving Fire selected does not make it a small, determined machine gun.
+   ```text
+   /programs/plug-ins/pop.o
+   ```
 
-If you want the first burst to finish despite further triggers, set **Retrigger: Off**. The fresh-instance default is On, which allows a new trigger to replace the burst already in progress.
+   Use your usual SD-card file transfer method or NT Helper.
+3. Restart the NT so it loads the file you copied.
+4. In **Add algorithm**, find **Pop**. If the NT first offers **Load**, load it, then add it to your preset.
 
-**Flat with 100% contour amount is still flat.** Amount controls the strength of a chosen shape; it does not invent one. Irregularity remains off until you turn it up.
+For an update, replace the old `pop.o` with the intended release file and restart. Save your current preset before changing your setup.
 
-# A short arrangement with time
+# First patch: four hits
 
-Two choices describe a burst:
+This example uses the NT, two patch cables and an **external drum voice**: a separate sound-producing module or patch with a trigger input. For this test, use an NT preset containing only a **new instance of Pop**. Saved instances may have different settings, and other NT algorithms can change the same outputs. An internal NT sound source needs a different bus-routing setup; it is not the setup used here.
 
-- **Termination** decides how it ends: a number of events, or a window of time.
-- **Timing** decides how the events are spaced: Pop's Internal timebase, or an external Clock.
-
-These are separate choices. Count works with either timing source, and so does Duration.
-
-## Count: an appointment book
-
-Count emits the selected number of actual output gates, then finishes. Irregularity and contours can move those gates around in time, but do not randomly delete them. The burst may take longer or shorter; an uninterrupted Count burst still emits its count.
-
-A restart, safety reset or detected clock failure can interrupt that process. Count is not a promise to complete an abandoned burst after the circumstances have changed.
-
-## Duration: closing time
-
-Duration admits events inside a fixed window. It does not promise a particular event count. Different irregular patterns can produce different counts, and a short window can legitimately produce none.
-
-An event scheduled exactly at the deadline is outside the window. Pop does not squeeze it in, shorten the preceding wait, or save it for later. A gate that already started is allowed to finish its full width.
-
-In Internal timing, Duration is in seconds. In Clock timing, it is in incoming-clock beats. **One incoming pulse is one beat** for this purpose; Pop does not assume a particular PPQN convention.
-
-# Installing a small disturbance
-
-Download the **`pop.o` asset from the intended tagged GitHub release**. It is the NT plug-in object, not a desktop library or a source archive.
-
-Place it on the MicroSD card at:
+## 1. Connect the sound
 
 ```text
-/programs/plug-ins/pop.o
+NT Output 1          → drum voice trigger input
+drum voice audio out → mixer or audio output
 ```
 
-You can transfer the file using your usual SD-card method or NT Helper. The NT scans plug-ins at startup and when the card is remounted. **Misc → Plug-ins → View info…** shows scan results. In **Add algorithm**, a plug-in may initially offer **Load**; load it, then add Pop. See the official NT manual's Plug-ins chapter for the procedure applicable to your firmware.
+Do not listen to NT Output 1 as if it were Pop's audio output. It carries the trigger pulses. If an envelope starts your sound, connect Pop to that envelope's trigger input and use the voice's normal audio path.
 
-For an update, retain a copy of your preset and replace the plug-in file with the intended release asset. Restarting provides a clear way to load the new file rather than continue using an already-loaded copy.
+## 2. Check the factory settings
 
-## Four letters that matter: `ThPp`
+Pop has three parameter pages: **Burst**, **Shape** and **Routing**.
 
-Pop's algorithm identity is **`ThPp`**, with exactly that capitalization. Future compatible Pop updates keep it.
-
-Earlier development builds used **`ThPo`**. That is a different identity. Presets containing those development instances may need Pop re-added and their settings recreated. There is no automatic identity migration to assume.
-
-The new simple defaults apply to **new instances**. Loading existing saved parameter values does not intentionally replace them with those defaults. Keep a record of development settings before changing identities.
-
-# The three pages
-
-| Page | Controls, in page order |
+| Page | Settings for this patch |
 |---|---|
-| **Burst** | Termination, Count, Duration, Rate, Manual Start, Retrigger |
-| **Shape** | Irregularity, Contour, Contour amount |
-| **Routing** | Trigger input, **Timing, Clock input**, Burst output, Burst mode, Active output, Active mode |
+| **Burst** | **Termination: Count**, **Count: 4**, **Rate: 20.0 Hz** |
+| **Shape** | **Irregularity: 0%**, **Contour: Flat**, **Contour amount: 100%** |
+| **Routing** | **Timing: Internal**, **Burst output: Output 1** (bus **13**), **Burst mode: Replace** |
 
-Timing sits immediately above Clock input. The clock socket has not moved; the explanation has.
+Leave the other settings at their defaults. This test needs **no input cable and no external clock**.
 
-Inactive controls retain their values. Count is inactive in Duration mode; Duration is inactive in Count mode. Clock input is inactive in Internal timing. That is deliberate, not a request to find a larger clock.
+## 3. Start the burst
 
-## Every parameter
+1. On the **Burst** page, select **Manual Start: Off** and leave it there briefly.
+2. Change **Manual Start** to **Fire**.
+3. You should hear four fast hits from the drum voice. Let the roll finish.
+4. To play it again, select **Off**, then **Fire** again. Leaving Fire selected does not repeat the burst.
 
-### Burst
+**Hz means “per second.”** At 20.0 Hz, the pulses are 50 milliseconds apart. The first pulse also waits 50 milliseconds; it is not immediate when you choose Fire.
 
-| Parameter | Range and fresh default | Operation |
+If the four hits blend into one sound, shorten the drum's decay or set **Rate to 5.0 Hz**. At 5.0 Hz, the hits are 0.2 seconds apart and easier to hear separately. This is an optional slower setting; the factory default is 20.0 Hz.
+
+# Starting from another module
+
+Once the manual test works:
+
+1. Connect a trigger source to **NT Input 1**.
+2. On **Routing**, select **Trigger input: Input 1** (bus **1**). This is the default.
+3. Keep **Timing: Internal** for now.
+4. Send one trigger. Pop should play the same four-hit burst.
+
+A trigger must go from low to high. A signal held high does not keep starting bursts; it must return low before the next trigger.
+
+**Manual Start works with Trigger input set to None.** None means that no external start input is selected. Manual Start still uses the selected Timing mode, so it needs a running clock when Timing is Clock.
+
+# Routing
+
+Routing decides which NT connections Pop uses. NT also supports internal connections called **buses**. For the examples, use physical jacks and ignore the Aux buses.
+
+| Physical jack | NT bus number | Default use |
+|---|---:|---|
+| **Input 1** | **1** | External start trigger |
+| **Output 1** | **13** | Burst: the individual trigger pulses |
+| **Output 2** | **14** | Active: a signal held high while the burst runs |
+
+**Output 1 is bus 13, not bus 1.** If the screen shows bus numbers, use this table to match the setting to the jack.
+
+| Routing control | What it does | Factory setting |
 |---|---|---|
-| **Termination** | Count / Duration; **Count** | Selects counted events or a time window. |
-| **Count** | 1–64; **4** | Number of gates in an uninterrupted Count burst. |
-| **Duration** | Internal: 0.100–30.000 s, 0.001 s steps; **0.500 s**. Clock: 0.25, 0.5, 1, 2, 4, 8, 16, 32 beats; **1 beat** | Window used in Duration mode. Internal and Clock values are retained separately. |
-| **Rate** | Internal: 1.0–100.0 Hz, 0.1 Hz steps; **20.0 Hz**. Clock: /8, /4, /2, unity, ×2, ×4, ×8; **unity** | Base spacing before contour, irregularity, clock-grid and safety limits. Internal and Clock values are retained separately. |
-| **Manual Start** | Off / Fire; **Off** | One observed Off-to-Fire action requests one burst. |
-| **Retrigger** | Off / On; **On** | Off consumes and ignores starts while occupied. On replaces the current or waiting request. |
+| **Trigger input** | Receives requests to start a burst. None disables the external start input. | Input 1 |
+| **Timing** | Selects Pop's own timing or an external clock. | Internal |
+| **Clock input** | Receives the running clock in Clock mode. | None |
+| **Burst output** | Sends the individual trigger pulses. | Output 1 |
+| **Burst mode** | Sets Add or Replace for Burst output. | Replace |
+| **Active output** | Sends a gate while a burst runs. None disables this output. | Output 2 |
+| **Active mode** | Sets Add or Replace for Active output. | Replace |
 
-### Shape
+A **gate** stays high for a period of time. Active includes the wait before the first hit once the burst has begun. It does not send one trigger for each hit, and it stays low while a request is waiting for a clock. You do not need Active for the first patch.
 
-| Parameter | Range and fresh default | Operation |
+Leave both output modes at **Replace** for these examples. Replace makes Pop set the signal on that bus. **Add** adds Pop's voltage to whatever is already there; use it only when you intend to combine signals.
+
+Keep Burst and Active on different buses, separate from both selected input buses. Trigger and Clock may share an input, as explained under **Clock setup**. The routing selectors use the NT's available buses, numbered 1–64; Trigger, Clock and Active also allow None.
+
+# Burst and Shape controls
+
+## Count and Duration: how the burst ends
+
+**Termination** chooses between two ways to finish. Its default is **Count**.
+
+- **Count** sends a chosen number of triggers. Count 4 means four triggers if you let the burst finish. Shape and Irregularity change their timing, not that number.
+- **Duration** allows triggers during a chosen length of time. It does not promise a particular number of hits. A short duration or slow rate may produce none. The time starts when the burst begins, after any wait for a clock.
+
+| Control | Values | Default |
 |---|---|---|
-| **Irregularity** | 0–100%; **0%** | Varies intervals directly. Zero removes random variation; a shaped contour still changes spacing. |
-| **Contour** | Flat, Acceleration, Deceleration, Rise and fall, Fall and rise; **Flat** | Shapes activity through the burst. |
-| **Contour amount** | 0–100%; **100%** | Strength of the contour. Zero removes contour shaping; Flat remains flat at any amount. |
+| **Count** | 1–64 triggers | 4 |
+| **Duration**, Internal | 0.100–30.000 seconds, in 0.001-second steps | 0.500 seconds |
+| **Duration**, Clock | 0.25, 0.5, 1, 2, 4, 8, 16 or 32 clock beats | 1 beat |
 
-### Routing
+In Clock mode, **one received clock pulse counts as one beat**. If your source sends several pulses per musical beat, Pop counts those individual pulses.
 
-| Parameter | Range and fresh default | Operation |
+Count is greyed out in Duration mode; Duration is greyed out in Count mode. Their values are kept. A restart, routing change or clock failure can interrupt a burst before it finishes.
+
+## Timing and Rate: the spacing between hits
+
+**Timing** is on **Routing**, directly above Clock input.
+
+- **Internal** uses Pop's own timing. It works without an external clock. You still start each burst.
+- **Clock** uses a running external clock to set the spacing. It also needs a start request.
+
+**Rate**, on **Burst**, sets the starting spacing before Contour and Irregularity change it.
+
+| Timing | Rate values | Default |
 |---|---|---|
-| **Trigger input** | None or a host bus; **Input 1** | Reads burst-start edges. None still permits Manual Start. |
-| **Timing** | Internal / Clock; **Internal** | Selects the finite burst's timebase. Internal is not an endless free-running cycle. |
-| **Clock input** | None or a host bus; **None** | Supplies timing in Clock mode. Select an input before requesting a clocked burst. |
-| **Burst output** | A host bus; **Output 1** | The individual output gates. |
-| **Burst mode** | Add / Replace; **Replace** | Adds Pop's contribution or replaces the selected bus. |
-| **Active output** | None or a host bus; **Output 2** | Indicates the active burst process. None disables routing, not the process itself. |
-| **Active mode** | Add / Replace; **Replace** | Bus ownership for the Active gate. |
+| **Internal** | 1.0–100.0 Hz, in 0.1 Hz steps | 20.0 Hz |
+| **Clock** | /8, /4, /2, unity, x2, x4, x8 | unity |
 
-The NT has **64 logical buses**: Inputs 1–12, Outputs 1–8 and Aux buses 1–44. These are not 64 physical sockets. Output 1 is host bus 13; Output 2 is host bus 14.
+In Internal mode, a lower Rate gives wider gaps. With Flat and 0% Irregularity, 5.0 Hz gives one hit every 0.2 seconds.
 
-Keep Burst and Active on different buses, and keep output buses separate from the selected input buses. Trigger and Clock inputs **may** share a bus; the next section explains the consequences.
+In Clock mode, **unity** means the same basic spacing as the clock. **x4** asks for four times that rate; **/2** asks for half that rate. At very fast or slow settings, Pop's timing limits can alter the result. If **Base limited** or **Interval limited** appears, try a less extreme rate.
 
-# A clock is not an invitation
+Rate and Duration remember separate values for Internal and Clock timing. Their units change when you switch Timing.
 
-**Clock supplies the timing. Trigger asks Pop to begin a burst.** A clock connected only to Clock input does not, by itself, request a burst.
+## Irregularity: uneven spacing
 
-## A reliable first clocked patch
+**Irregularity** ranges from **0–100%**, with a default of **0%**. At 0%, there is no random variation. Increase it to make some gaps shorter and others longer. Try 30% on an eight-hit drum fill.
 
-1. Send a continuous clock to **Input 1**.
-2. Set **Timing: Clock**, **Clock input: Input 1**.
-3. Use a separate trigger on **Input 2**, with **Trigger input: Input 2**. Alternatively select Trigger input None and use Manual Start.
-4. Select **Count: 4**, **Rate: ×4**, **Irregularity: 0%**, **Contour: Flat**, **Retrigger: Off**.
-5. Let at least two clock edges arrive, then send a trigger or use Off → Fire.
+In Count mode, it does not randomly remove hits. Count 8 still sends eight triggers if the burst finishes. In Duration mode, the changing gaps can change how many hits fit before the time ends.
 
-Pop needs two fresh edges to establish a period. An accepted request starts its process on an eligible **later** clock edge, after any outstanding gate and low gap have cleared. A trigger arriving exactly on a clock edge does not turn that edge into the burst's anchor.
+In Clock mode, Pop chooses gaps from halves, quarters and other straight divisions or multiples of the clock interval. These allowed gaps form the **clock grid**. Irregularity changes the chosen gap within that structure. It does not add triplets, dotted timing or off-grid timing variation. Small adjustments may choose the same gap.
 
-There is then a generated first wait. With a steady 120 BPM quarter-note clock, Flat, no irregularity and ×4, the first gate is 125 ms after activation. It is not copied from the trigger or the activation edge.
+## Contour and Contour amount: changing speed
 
-The straight Clock choices use a power-of-two timing grid. There is no triplet or dotted setting. Contour and irregularity select timing on that grid; limiting can also affect spacing.
+**Contour changes timing, not volume.**
 
-## One cable doing two jobs
-
-You can select the same input for Trigger and Clock. For a useful starting point, choose **Retrigger: Off**.
-
-- The first eligible input edge requests a burst.
-- Further edges provide clock timing while the occupied request ignores extra starts.
-- After completion, a later edge can request another burst.
-
-This is not a promise of one complete burst per input edge. Acquisition, activation, the requested count or duration, and the final gate all take time.
-
-With **Retrigger: On**, each shared edge also replaces the waiting request. Repeated edges can keep replacing it before an eligible activation, so nothing gets as far as an output gate. For clear musical control, use a continuous clock and a separate occasional trigger, or Manual Start.
-
-A committee cannot finish a timetable if every tick appoints a new committee.
-
-## Waiting, tempo changes and clock stop
-
-A request made before clock acquisition can wait up to **6 seconds**. If it times out, send a fresh request after the clock is established. Clock input None rejects a clocked start.
-
-Accepted clock periods are **50 ms to 2 seconds**. A burst captures its period at activation. Later valid tempo changes update the tracker for future bursts rather than stretch the current burst's schedule or duration.
-
-Clock validity expires after **three periods** without a valid edge; an invalid observed period can also stop the active clocked burst. On detection, future events are discarded and Active goes low. Any Burst gate already high finishes its full width. Recovery does not resume the abandoned burst: reacquire a valid clock and send a fresh start.
-
-# Shape, without changing the height of the furniture
-
-Contours change **when gates happen**, not their voltage or width.
-
-| Contour | Activity |
+| Contour | What it does |
 |---|---|
-| **Flat** | No contour-shaped change in base spacing. |
-| **Acceleration** | Starts more slowly and becomes busier. |
-| **Deceleration** | Starts busier and becomes more sparse. |
-| **Rise and fall** | Sparse ends, busy middle. |
-| **Fall and rise** | Busy ends, quieter middle. |
+| **Flat** | No speed change from the contour |
+| **Acceleration** | Starts slower and gets faster |
+| **Deceleration** | Starts faster and gets slower |
+| **Rise and fall** | Slower at the start and end, faster in the middle |
+| **Fall and rise** | Faster at the start and end, slower in the middle |
 
-In Count mode, the contour progresses through the requested events. In Duration mode, it progresses through elapsed window time. Very short Count bursts have little room for a grand dramatic arc.
+**Contour amount** ranges from **0–100%**. At 0%, the contour has no effect. At 100%, it has its full effect. The defaults are **Flat** and **100%**. Flat stays flat at any amount.
 
-**Irregularity** spreads the intervals around that shape. It is not a probability control that throws away candidate pulses. Count still counts emitted events; Duration can produce a different total for different patterns.
+Try Count 8 to hear the speed change over more hits. Acceleration and Deceleration have no effect at Count 1 or 2. In Clock mode, speed changes happen in steps because the gaps stay on the clock grid.
 
-Every accepted start or restart advances the instance's pattern stream. Identical-looking bursts can still occur by chance. Automatic seeding uses a host cycle counter, not a verified entropy source. There is no player Seed or repeat-pattern control. Ignored triggers do not advance a replacement pattern or queue work for later.
+## Retrigger: starting again during a burst
 
-Choose a contour and increase Irregularity after the regular patch works. This makes it easier to distinguish intended uncertainty from an incorrectly connected cable.
+**Retrigger**, on **Burst**, decides what another start does while Pop is busy. Its default is **On**.
 
-# What happens when you ask again
+- **Off:** new starts are ignored until the current burst, including any waiting time, has finished. They are not saved for later.
+- **On:** a new start replaces the unfinished burst with a new one. It does not queue another burst. A pulse already high is allowed to finish before the replacement begins.
 
-**Occupied** includes waiting for activation, generation and the final gate draining. It is not the same thing as Active being high.
+Use Off when you want a fill to finish. Use On when each new gesture should restart it. Repeated starts with On can keep replacing a waiting burst before it makes any hits.
 
-| Retrigger | A new start while occupied |
+Most musical settings are taken when you start a burst. Change them, then start again to hear the new settings. Retrigger responds immediately. Changing Timing or Routing stops the current process, so set those before starting.
+
+# Clock setup
+
+**Clock sets the speed. Trigger requests a burst.** A clock connected only to Clock input does not start bursts by itself.
+
+Keep the drum wiring from the first patch. Use a clock sending **one pulse per beat at 120 BPM** (120 beats per minute). That is two pulses per second.
+
+1. Connect the clock to **NT Input 1**.
+2. On **Routing**, select **Timing: Clock**, then **Clock input: Input 1** (bus 1).
+3. Set **Trigger input: None**. You will use Manual Start, so the clock is not also treated as a start trigger.
+4. On **Burst**, set **Termination: Count**, **Count: 4**, **Rate: x4**, **Retrigger: Off**.
+5. On **Shape**, set **Irregularity: 0%**, **Contour: Flat**.
+6. Let at least two clock pulses arrive. Select **Manual Start: Off**, leave it briefly, then select **Fire**.
+
+Pop waits for a clock pulse after your start request, then waits its first normal gap. In this patch, hits are 125 milliseconds apart. The first hit is 125 milliseconds after that later clock pulse, not immediately when you choose Fire.
+
+For an external start button or sequencer trigger, connect it to **NT Input 2** and set **Trigger input: Input 2** (bus 2). Keep the continuous clock on Input 1.
+
+Keep the clock running, with pulses **0.05–2 seconds apart**. If it stops or becomes invalid, Pop cancels the burst. Restore a steady clock and start again; the old burst does not resume. A burst keeps the clock speed measured when it begins; valid tempo changes affect later bursts.
+
+## Sharing one input for Clock and Trigger
+
+You can select the same input for Clock input and Trigger input. Set **Retrigger: Off** for this patch.
+
+The first eligible pulse requests a burst. Later pulses keep supplying timing, while their extra start requests are ignored until Pop finishes. A later pulse can then request another burst.
+
+With **Retrigger: On**, every shared pulse can restart the waiting request. It may never get far enough to produce a hit. If this patch is silent, use Retrigger Off or separate inputs.
+
+# Examples
+
+**Four separate hits:** Internal, Count 4, Rate 5.0 Hz, Flat, Irregularity 0%. Use Manual Start. This checks the wiring before faster rolls.
+
+**A speeding-up drum fill:** Internal, Count 8, Rate 10.0 Hz, Acceleration, Contour amount 100%, Irregularity 0%, Retrigger Off. Then try Irregularity 30% for uneven gaps. The count stays eight.
+
+**A timed hi-hat fill:** Internal, Termination Duration, Duration 2.000 seconds, Rate 20.0 Hz, Irregularity 30%, Flat, Retrigger Off. Each burst can add hits for two seconds; the number of hits can vary.
+
+# Troubleshooting
+
+First try **First patch: four hits**. For a slower test, change only Rate to 5.0 Hz. If that works, add the external trigger or clock afterward.
+
+| Problem | Check |
 |---|---|
-| **Off** | Consumed and ignored. No queue, no delayed surprise and no change to the current pattern. |
-| **On** | Replaces the remaining process with the latest request. An existing high gate finishes, then the required low gap clears before the replacement can activate. |
+| **No sound** | Pop makes triggers, not audio. Send Burst to a drum or envelope trigger input, and listen to that voice's audio output. |
+| **No triggers at the expected jack** | Match Burst output to the jack. Output 1 is bus 13; Input 1 is bus 1. Use Burst, not Active, for individual hits. |
+| **Manual Start works only once** | Select Off and leave it briefly before selecting Fire again. Holding Fire does not repeat. |
+| **Four hits sound like one** | The default 20.0 Hz is a fast roll. Try Rate 5.0 Hz and a shorter decay on the drum voice. |
+| **External trigger does nothing** | Match Trigger input to the cable's NT input. Let the signal return low between starts. |
+| **Clock mode is silent** | Select Clock input, keep a valid clock running, wait for two pulses, then request a burst. A clock alone is not a start request. |
+| **Clock and Trigger share an input** | Use Retrigger Off. On can restart the waiting request on every pulse and prevent hits. |
+| **“No clock input”** | Timing is Clock but Clock input is None. Select the connected clock input. |
+| **“Waiting for clock” or “Clock wait timeout”** | Check the cable and clock speed. Once it is steady, select Manual Start Off, then Fire again. |
+| **“Clock stopped or invalid”** | Restore a steady clock with pulses 0.05–2 seconds apart, then send a new start. |
+| **“Invalid routing”** | Keep Burst and Active on different buses, separate from both selected inputs. To edit a greyed-out Clock input, temporarily select Timing Clock. Trigger and Clock may share an input. |
+| **A control is greyed out** | Count is inactive in Duration mode; Duration is inactive in Count mode. Clock input is inactive with Internal timing. |
+| **Short Duration gives no hits** | The first wait may not fit. Increase Duration or Rate, or use Count for a set number of hits. |
+| **An edited setting has no effect yet** | Start again. Most musical settings do not change a burst already in progress. |
+| **Rate differs from the selected value** | Contour and Irregularity change gaps. For a timing-limit message, try a less extreme rate. |
+| **It works only in a new preset** | Check other algorithms using the same output, and settings saved in the old instance. |
+| **Pop is missing or fails to load** | Check the `.o` file and folder, restart, and inspect **Misc → Plug-ins → View info…**. Keep the exact error when reporting a problem. |
 
-Old gates do not count toward the replacement Count. Further starts replace the pending request; they do not build a queue.
+# Compatibility and technical notes
 
-Retrigger is observed live. Changing On to Off does not erase work already accepted. Changing Off to On does not replay starts previously ignored.
-
-The burst settings are sampled at each accepted start. Changing Count, Duration, Rate or Shape during a burst affects the next accepted request. Timing and routing changes are safety changes: they clear the process and require a fresh start. Preset loading or a recognized sample-rate change also clears activity. Pop does not save a half-finished burst and resume it from a preset.
-
-# Two outputs, no committee required
-
-## Burst
-
-Each Pop gate contributes **0 V or +5 V**, with a **5 ms high rounded up to whole samples**, and at least **1 ms low rounded up to whole samples** before another rise. At 48 kHz these are 240 high samples and at least 48 low samples. Pop limits timing where needed to keep distinct, correctly formed gates.
-
-In **Replace**, Pop owns the selected bus. In **Add**, its contribution is added to what is already there. A shared Add-mode bus is not guaranteed to have a final voltage of only 0 V or +5 V.
-
-## Active
-
-Active rises when the process activates, including the wait before its first generated gate. It normally remains high through generation and the final gate draining. Waiting for clock or a pending activation alone is low. A musical restart can retain Active while the old high drains, then leave it low during the remaining wait.
-
-Detected clock failure is different: Active falls immediately on detection while a Burst gate already high is allowed to finish. Active is a process gate, not a contour envelope or a separate Done pulse.
-
-The 5 ms width and nominal +5 V contribution describe the algorithm. Physical output levels and receiver tolerances belong to the hardware qualification record for the release.
-
-# A few useful disturbances
-
-## A civilised drum fill
-
-Use Internal Count 4, Rate 20 Hz, Flat and Irregularity 0%. Send Burst to a drum trigger. Use a separate performance trigger or Manual Start. Retrigger Off lets the fill finish; On lets a new gesture replace it.
-
-## An increasingly urgent meeting
-
-Use Count 8, Acceleration, Contour amount 100% and a moderate Internal Rate. Begin with Irregularity 0%, then add a little. Send Burst to a noise envelope or percussion voice. The notes gather pace; nobody needs to raise their voice.
-
-## A busy middle
-
-Use Duration 2 seconds, Rise and fall, Contour amount 100%, Rate 20 Hz and Irregularity around 50%. Send Burst to a hi-hat or small percussion voice. The window stays fixed while the event count varies. Try Fall and rise for the opposite distribution.
-
-## A clocked handful
-
-Use the separate-clock patch above: Count 4, Clock ×4, Flat and no irregularity. Trigger it occasionally over a steady beat. Then try a contour or a little irregularity. The grid remains straight even when the arrangement becomes less punctual.
-
-## A gate for the whole affair
-
-Send Active to a VCA or an external envelope while Burst excites a percussion source. Remember that Active includes the pre-first-event wait after activation. It is a useful process signal, not a substitute for a shaped audio envelope.
-
-# If the universe remains silent
-
-| Symptom | Check |
-|---|---|
-| **No audio** | Pop produces gates. Route Burst to a drum or envelope trigger, not directly to an audio input expecting a voice. |
-| **No burst in Clock timing** | Select Clock input, provide valid edges, and send a separate start. A clock alone is only a timebase. |
-| **Both inputs share a bus and nothing starts** | Try Retrigger Off, or use separate clock and trigger sources. Restarting the pending request on every edge can prevent activation. |
-| **An input stays high** | Starts are edges, not levels. Let it fall to 1 V or below before a rise to 2 V or above. A held high does not repeatedly start bursts. |
-| **Manual Start does nothing** | Let Off be observed before selecting Fire. A saved or held Fire is not a new action. |
-| **It stopped after the clock disappeared** | That is cancellation, not pause. Restore a valid clock and send a fresh start. |
-| **A short Duration emits nothing** | The first generated wait may not fit inside the window. Increase Duration or Rate, or use Count when event count matters. |
-| **A control is inactive** | Count and Duration are mutually applicable; Clock input is inactive in Internal timing. Values are retained. |
-| **Changing settings seems to do nothing** | Most burst settings are held from the accepted start. Trigger a new burst after editing. |
-| **Invalid routing** | Keep outputs separate from each other and the selected inputs. Check the intended physical or internal bus. |
-| **Fewer old-burst gates than expected** | A restart, safety reset or clock failure can abandon the old process. There is no backlog. |
-| **ClockIncomplete on an early development build** | That build did not implement Clock generation. Use the functional tagged release; rewiring does not implement missing code. |
-| **Unresolved symbol / plug-in fails to load** | Verify the exact release asset and required host API. Preserve the literal error and release version when reporting it. This is a binary/firmware issue, not a trigger cable diagnosis. |
-| **A development preset cannot find Pop** | Check the identity change from ThPo to ThPp. You may need to re-add Pop. |
-
-If several starts arrive together, a simultaneous external edge and Manual Start collapse to one request. If a safety change has just cleared the process, send a fresh edge after the new configuration is established.
-
-# Compatibility: evidence before optimism
-
-The release build uses the pinned official **disting NT API v14**. The host must provide the required API and symbols. The release's build record identifies the SDK, compiler, object digest and firmware export set used for the offline check.
-
-Native engine and actual-adapter tests, ARM object inspection and firmware-symbol checks establish different things. They do not, by themselves, establish physical DAC levels, trigger-receiver tolerances, target CPU limits or every firmware/host transition.
-
-Consult the release notes for the exact hardware observations and remaining qualification. An earlier development object was reported to load and run; do not turn that into a claim that every later release, firmware or patch has been tested on the module.
-
-For the host's own file-loading and firmware procedures, use the [official NT manual and firmware page](https://www.expert-sleepers.co.uk/distingNTfirmwareupdates.html). The [official C++ API](https://github.com/expertsleepersltd/distingNT_API) is the development reference.
-
-Pop is a finite disturbance. The rest of the patch is your department.
+- This is **Pop v0.1.0-beta.1**, an experimental release. Physical firmware compatibility, output levels, receiver response and target performance have not been fully qualified. Matching shaped Clock timing between desktop tests and the module also remains unverified.
+- The host must load **disting NT API v14** plug-ins. An exact minimum firmware version is not established here. See the [official NT manual and firmware page](https://www.expert-sleepers.co.uk/distingNTfirmwareupdates.html) for host installation procedures.
+- Pop's identity is **ThPp**. Earlier development builds used **ThPo**; old instances may need Pop re-added. New defaults do not overwrite saved settings in an existing instance.
+- Burst pulses contribute nominally **+5 V for 5 milliseconds**, with at least **1 millisecond low** before the next pulse. Times are rounded up to whole audio samples. Add mode combines this with the bus's existing voltage.
+- External inputs re-arm at **1 V or below** and trigger at **2 V or above**. A low-to-high 0–5 V trigger meets those thresholds.
