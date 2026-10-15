@@ -22,6 +22,7 @@ bool Schmitt::observe(float voltage) {
 double contourHeight(Contour contour, double u) {
     switch (contour) {
     case Contour::Flat:
+    case Contour::Invalid:
         return 0.0;
     case Contour::Acceleration:
         return 1.0 - 2.0 * u;

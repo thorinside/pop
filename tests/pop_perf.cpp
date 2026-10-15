@@ -16,12 +16,17 @@ struct Result {
 };
 Result measure(const char *scenario, bool baseline, std::FILE *blocks, int repetition) {
     host::Instance h;
+    const bool clockScenario = std::strncmp(scenario,"clock-",6)==0;
     h.set(RateParam, 1000);
     h.set(ContourParam, 2);
     h.set(AmountParam, 100);
     h.set(IrregularityParam, 0);
     h.set(TerminationParam, 1);
     h.set(DurationParam, 30000);
+    if(clockScenario) {
+        h.set(TimingParam,1); h.set(ClockInputParam,2);
+        h.set(RateParam,3); h.set(DurationParam,7);
+    }
     if (std::strcmp(scenario, "drain") == 0) {
         h.set(TerminationParam, 0);
         h.set(CountParam, 1);
@@ -42,13 +47,21 @@ Result measure(const char *scenario, bool baseline, std::FILE *blocks, int repet
     int counter = 0;
     for (int base = 0; base < 48000; base += 128) {
         const int frames = std::min(128, 48000 - base);
-        if (std::strcmp(scenario, "restart") == 0)
+        if (std::strcmp(scenario, "restart") == 0 || std::strcmp(scenario,"clock-restart")==0)
             h.set(ManualParam, counter % 2 ? 0 : 1);
         if (std::strcmp(scenario, "safety") == 0) {
             h.set(TriggerInputParam, counter % 2);
             h.set(ManualParam, counter % 2 ? 0 : 1);
         }
         std::fill_n(h.buffers.data(), 64 * frames, 0.0f);
+        if(clockScenario) for(int i=0;i<frames;++i) {
+            const int t=base+i;
+            const bool regular=t%2400==0;
+            const bool stopped=std::strcmp(scenario,"clock-loss")==0;
+            const bool invalid=std::strcmp(scenario,"clock-invalid")==0;
+            if((regular && (!(stopped||invalid)||t<=2400))||(invalid&&t==2402))
+                h.buffers[static_cast<size_t>(frames+i)]=5;
+        }
         host::trackingAllocations = true;
         const auto start = Clock::now();
         if (baseline)
@@ -79,6 +92,8 @@ Result measure(const char *scenario, bool baseline, std::FILE *blocks, int repet
         CHECK(events == 1);
     if (idle || baseline || std::strcmp(scenario, "invalid") == 0)
         CHECK(events == 0);
+    if(!baseline && std::strcmp(scenario,"clock-saturated")==0) CHECK(events>50);
+    if(!baseline && std::strcmp(scenario,"clock-invalid")==0) CHECK(events==0);
     const double total = std::accumulate(durations.begin(), durations.end(), 0.0);
     std::sort(durations.begin(), durations.end());
     const double p95 =
@@ -95,7 +110,7 @@ int main(int argc, char **) {
     if (results)
         std::fprintf(results,
                      "scenario,side,repetition,nsPerSample,events,allocations,p95BlockNs\n");
-    for (const char *scenario : {"idle", "saturated", "restart", "safety", "drain", "invalid"}) {
+    for (const char *scenario : {"idle", "saturated", "restart", "safety", "drain", "invalid", "clock-saturated", "clock-restart", "clock-loss", "clock-invalid"}) {
         std::vector<double> samples;
         double worstP95 = 0;
         for (int r = 0; r < repetitions; ++r)

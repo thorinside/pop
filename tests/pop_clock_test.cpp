@@ -1,12 +1,21 @@
 #include "check.h"
 #include "nt_host_driver.h"
+#include "fixtures/clock/vectors.h"
 #include <algorithm>
 #include <cstdio>
+#include <cstdlib>
 using namespace pop;
 
 host::Trace runClock(host::Instance &h, int samples, int partition,
                      const std::vector<uint64_t> &starts, const std::vector<uint64_t> &clocks) {
     host::Trace trace;
+    static unsigned receipt = 0;
+    std::FILE *raw = nullptr;
+    if(std::getenv("POP_CLOCK_TRACE")) {
+        const auto path="build/clock-trace-"+std::to_string(receipt++)+".csv";
+        raw=std::fopen(path.c_str(),"w"); CHECK(raw);
+        std::fprintf(raw,"sample,triggerEdge,clockEdge,burstV,activeV\n");
+    }
     bool previous = false;
     for (int base = 0; base < samples; base += partition) {
         const int frames = std::min(partition, samples - base);
@@ -31,8 +40,12 @@ host::Trace runClock(host::Instance &h, int samples, int partition,
             trace.burst.push_back(b);
             trace.active.push_back(a);
             previous = b == 5;
+            if(raw) std::fprintf(raw,"%llu,%d,%d,%.0f,%.0f\n",static_cast<unsigned long long>(t),
+                std::find(starts.begin(),starts.end(),t)!=starts.end(),
+                std::find(clocks.begin(),clocks.end(),t)!=clocks.end(),b,a);
         }
     }
+    if(raw) std::fclose(raw);
     return trace;
 }
 void configure(host::Instance &h, int count = 8, int ratio = 3) {
@@ -121,6 +134,31 @@ int main() {
         if (restart) CHECK(t.rises.empty());
         else CHECK(!t.rises.empty() && t.rises.front() == 27100);
         std::printf("clock,shared,termination=%d,restart=%d,rises=%zu,PASS\n",termination,restart,t.rises.size());
+    }
+    for(int term : {0,1}) {
+        host::Instance high; configure(high,64,0);
+        high.set(TerminationParam,term); high.set(DurationParam,7);
+        expect(runClock(high,180000,128,{200},{100,24050,48000,71950,95900,96000,120000,144000,168000}),
+               {48000,71950,95900},24050,96000);
+        CHECK(inspectEngine(high.algorithm).phase()==Phase::Idle && inspectEngine(high.algorithm).error()==Error::ClockStopped);
+        host::Instance lost; configure(lost,64,3);
+        lost.set(TerminationParam,term); lost.set(DurationParam,7);
+        expect(runClock(lost,180000,28,{200},{100,24100,96100,120100,144100,168100}),
+               {27100,30100,33100,36100,39100,42100,45100,48100,51100,54100,57100,60100,63100,66100,69100,72100,75100,78100,81100,84100,87100,90100,93100},24100,96100);
+        CHECK(inspectEngine(lost.algorithm).acceptedRequests()==1);
+        std::puts("live,09-clock-loss,both terminations,due-suppression/high-drain/Active-low/recovery-no-replay,PASS");
+    }
+    for (const auto &f : clock_fixture::cases) for(int partition : {4,28,128}) {
+        host::Instance h; configure(h,5,1);
+        h.set(ContourParam,f.contour); h.set(AmountParam,100); h.set(IrregularityParam,50);
+        h.set(TerminationParam,f.duration); h.set(DurationParam,3);
+        injectSeed(h.algorithm,f.seed);
+        auto r=std::vector<uint64_t>(f.rises,f.rises+f.size);
+        for(auto &v:r) v+=24101;
+        expect(runClock(h,220000,partition,{200},{100,24101,48102,72103,96104,120105,144106,168107,192108,216109}),r,24101,24101+f.end);
+        const auto &e=inspectEngine(h.algorithm);
+        CHECK(e.requestState()==f.request && e.generationState()==f.generation && e.generationDraws()==f.draws);
+        std::printf("clock,Decimal80,seed=%u,contour=%d,Duration=%d,partition=%d,draws=%u,PASS\n",f.seed,f.contour,f.duration,partition,f.draws);
     }
     std::puts("Clock adapter PASS");
 }

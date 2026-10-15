@@ -9,7 +9,7 @@ WARN := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow
 CXXFLAGS := -std=c++17 -O2 $(WARN) -fno-exceptions -fno-rtti -ffp-contract=off
 SRC := src/pop_engine.cpp src/pop_plugin.cpp
 TESTFLAGS := -DPOP_TESTING
-.PHONY: test sanitize hardware imports-check inspect desktop analyze live perf fixtures-check
+.PHONY: test sanitize hardware imports-check inspect desktop analyze live perf fixtures-check clock-test manual package release-package
 $(BUILD):
 	mkdir -p $@
 $(BUILD)/engine_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_math.h tests/pop_engine_test.cpp tests/check.h tests/fixtures/internal.h | $(BUILD)
@@ -18,7 +18,7 @@ $(BUILD)/sample_math_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_ma
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_sample_math_test.cpp -o $@
 $(BUILD)/regressions_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_regressions_test.cpp tests/check.h | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_regressions_test.cpp -o $@
-$(BUILD)/clock_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_clock_test.cpp tests/check.h | $(BUILD)
+$(BUILD)/clock_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_clock_test.cpp tests/fixtures/clock/vectors.h tests/check.h | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_clock_test.cpp -o $@
 $(BUILD)/clock_boundaries_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_math.h tests/pop_clock_boundaries_test.cpp tests/check.h | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_clock_boundaries_test.cpp -o $@
@@ -58,6 +58,7 @@ $(BUILD)/pop.o: $(BUILD)/arm/pop_engine.o $(BUILD)/arm/pop_plugin.o
 hardware: $(BUILD)/pop.o imports-check
 imports-check: $(BUILD)/pop.o
 	python3 tests/check_arm_imports.py --nm $(ARM_PREFIX)nm $(BUILD)/pop.o
+	python3 tests/check_arm_identity.py $(BUILD)/pop.o
 inspect: hardware
 	$(ARM_PREFIX)readelf -h -S $(BUILD)/pop.o
 	$(ARM_PREFIX)size -A $(BUILD)/pop.o
@@ -78,5 +79,11 @@ analyze: $(BUILD)/compile_commands.json
 	cppcheck --enable=warning,style,performance,portability --std=c++17 --inline-suppr --suppress=missingIncludeSystem --suppress=noExplicitConstructor:distingNT_API/include/distingnt/serialisation.h --error-exitcode=1 -Isrc -IdistingNT_API/include src
 	$(CXX) $(CPPFLAGS) -std=c++17 --analyze $(SRC) -Xanalyzer -analyzer-output=text
 	$(CLANG_TIDY) -p $(BUILD) --config='{Checks: "-*,clang-analyzer-*,performance-*", HeaderFilterRegex: "(^|/)src/", SystemHeaders: false}' --warnings-as-errors='*' $(SRC)
+manual:
+	python3 tools/render_manual.py --output $(BUILD)/manual
+package: hardware
+	python3 tools/package.py --build $(BUILD) --output $(BUILD)/release
+release-package: hardware manual
+	python3 tools/package.py --build $(BUILD) --output $(BUILD)/release --require-pdf
 fixtures-check:
 	shasum -a 256 -c tests/fixtures/SHA256SUMS

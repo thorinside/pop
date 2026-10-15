@@ -126,7 +126,7 @@ bool validRouting(const int16_t *v) {
 Settings settings(const Algorithm &a) {
     Settings s;
     s.termination = a.v[TerminationParam] >= 0 && a.v[TerminationParam] <= 1
-        ? static_cast<Termination>(a.v[TerminationParam]) : static_cast<Termination>(255);
+        ? static_cast<Termination>(a.v[TerminationParam]) : Termination::Invalid;
     s.timing = static_cast<Timing>(a.v[TimingParam]);
     s.count = a.v[CountParam];
     s.durationMs = a.mode ? a.internalDuration : a.v[DurationParam];
@@ -135,7 +135,7 @@ Settings settings(const Algorithm &a) {
     s.durationBeatsIndex = a.mode ? a.v[DurationParam] : a.clockDuration;
     s.irregularity = a.v[IrregularityParam];
     s.contour = a.v[ContourParam] >= 0 && a.v[ContourParam] <= 4
-        ? static_cast<Contour>(a.v[ContourParam]) : static_cast<Contour>(255);
+        ? static_cast<Contour>(a.v[ContourParam]) : Contour::Invalid;
     s.amount = a.v[AmountParam];
     return s;
 }

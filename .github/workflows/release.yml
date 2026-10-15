@@ -1,0 +1,72 @@
+name: Verify and package Pop
+on:
+  push:
+    branches: [main, 'pop/**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Install build and document tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang clang-tidy cppcheck gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-dev pandoc poppler-utils
+      - name: Verify tag and pinned SDK identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C distingNT_API rev-parse HEAD)" = 6975a630cb5f86de6f8c709f5467f4666bbd4579
+          echo 'ec609acff01f5b4f2afcc09ee4af1ee45807f19324c98e503f31b51c2d7da411  distingNT_API/include/distingnt/api.h' | sha256sum -c -
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            test "$GITHUB_REF_NAME" = "v$(tr -d '\n' < VERSION)"
+            test "$(git rev-parse "$GITHUB_REF_NAME^{commit}")" = "$GITHUB_SHA"
+          fi
+      - name: Native, sanitizer, static and real-adapter verification
+        run: |
+          make fixtures-check test
+          make sanitize
+          make CLANG_TIDY=clang-tidy ANALYSIS_CXX=clang++ analyze
+          make live perf
+      - name: ARM, manual and exact SD archive
+        run: |
+          make hardware inspect desktop release-package
+          make BUILD=build/reproduced hardware
+          cmp build/pop.o build/reproduced/pop.o
+          cd build/release
+          sha256sum -c SHA256SUMS
+      - name: Retain exact candidate assets
+        uses: actions/upload-artifact@v7
+        with:
+          name: pop-${{ github.sha }}
+          path: build/release/*
+          if-no-files-found: error
+  publish:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: pop-${{ github.sha }}
+          path: release
+      - name: Verify asset bytes before publication
+        working-directory: release
+        run: sha256sum -c SHA256SUMS
+      - name: Publish experimental prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Pop $GITHUB_REF_NAME" --notes "Experimental API v14 prerelease. See the versioned manual and build provenance. Physical firmware compatibility, loader/resources, DAC/receiver timing and musical qualification remain unverified. ThPp replaces the old ThPo development identity; old development presets may need Pop re-added."

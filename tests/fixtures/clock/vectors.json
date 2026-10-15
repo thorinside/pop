@@ -1,0 +1,299 @@
+[
+  {
+    "seed": 1,
+    "contour": 0,
+    "duration": 0,
+    "rises": [
+      12001,
+      36002,
+      48002,
+      72003,
+      84004
+    ],
+    "end": 84244,
+    "request": 270369,
+    "generation": 745495504,
+    "draws": 5
+  },
+  {
+    "seed": 1,
+    "contour": 0,
+    "duration": 1,
+    "rises": [
+      12001,
+      36002
+    ],
+    "end": 48002,
+    "request": 270369,
+    "generation": 307599695,
+    "draws": 3
+  },
+  {
+    "seed": 1,
+    "contour": 1,
+    "duration": 0,
+    "rises": [
+      24001,
+      48002,
+      60003,
+      72003,
+      78004
+    ],
+    "end": 78244,
+    "request": 270369,
+    "generation": 745495504,
+    "draws": 5
+  },
+  {
+    "seed": 1,
+    "contour": 1,
+    "duration": 1,
+    "rises": [
+      24001
+    ],
+    "end": 48002,
+    "request": 270369,
+    "generation": 2647435461,
+    "draws": 2
+  },
+  {
+    "seed": 1,
+    "contour": 2,
+    "duration": 0,
+    "rises": [
+      6001,
+      18001,
+      30002,
+      54003,
+      78004
+    ],
+    "end": 78244,
+    "request": 270369,
+    "generation": 745495504,
+    "draws": 5
+  },
+  {
+    "seed": 1,
+    "contour": 2,
+    "duration": 1,
+    "rises": [
+      6001,
+      18001,
+      30002
+    ],
+    "end": 48002,
+    "request": 270369,
+    "generation": 2398689233,
+    "draws": 4
+  },
+  {
+    "seed": 1,
+    "contour": 3,
+    "duration": 0,
+    "rises": [
+      24001,
+      48002,
+      54003,
+      78004,
+      102005
+    ],
+    "end": 102245,
+    "request": 270369,
+    "generation": 745495504,
+    "draws": 5
+  },
+  {
+    "seed": 1,
+    "contour": 3,
+    "duration": 1,
+    "rises": [
+      24001,
+      36002
+    ],
+    "end": 48002,
+    "request": 270369,
+    "generation": 307599695,
+    "draws": 3
+  },
+  {
+    "seed": 1,
+    "contour": 4,
+    "duration": 0,
+    "rises": [
+      6001,
+      30002,
+      54003,
+      78004,
+      84004
+    ],
+    "end": 84244,
+    "request": 270369,
+    "generation": 745495504,
+    "draws": 5
+  },
+  {
+    "seed": 1,
+    "contour": 4,
+    "duration": 1,
+    "rises": [
+      6001,
+      18001,
+      30002
+    ],
+    "end": 48002,
+    "request": 270369,
+    "generation": 2398689233,
+    "draws": 4
+  },
+  {
+    "seed": 17,
+    "contour": 0,
+    "duration": 0,
+    "rises": [
+      12001,
+      24001,
+      36002,
+      48002,
+      60003
+    ],
+    "end": 60243,
+    "request": 4596240,
+    "generation": 1170952916,
+    "draws": 5
+  },
+  {
+    "seed": 17,
+    "contour": 0,
+    "duration": 1,
+    "rises": [
+      12001,
+      24001,
+      36002
+    ],
+    "end": 48002,
+    "request": 4596240,
+    "generation": 689350324,
+    "draws": 4
+  },
+  {
+    "seed": 17,
+    "contour": 1,
+    "duration": 0,
+    "rises": [
+      24001,
+      48002,
+      60003,
+      72003,
+      78004
+    ],
+    "end": 78244,
+    "request": 4596240,
+    "generation": 1170952916,
+    "draws": 5
+  },
+  {
+    "seed": 17,
+    "contour": 1,
+    "duration": 1,
+    "rises": [
+      24001,
+      36002,
+      42002
+    ],
+    "end": 48002,
+    "request": 4596240,
+    "generation": 689350324,
+    "draws": 4
+  },
+  {
+    "seed": 17,
+    "contour": 2,
+    "duration": 0,
+    "rises": [
+      6001,
+      18001,
+      30002,
+      54003,
+      78004
+    ],
+    "end": 78244,
+    "request": 4596240,
+    "generation": 1170952916,
+    "draws": 5
+  },
+  {
+    "seed": 17,
+    "contour": 2,
+    "duration": 1,
+    "rises": [
+      6001,
+      18001,
+      30002,
+      42002
+    ],
+    "end": 48002,
+    "request": 4596240,
+    "generation": 1170952916,
+    "draws": 5
+  },
+  {
+    "seed": 17,
+    "contour": 3,
+    "duration": 0,
+    "rises": [
+      24001,
+      36002,
+      42002,
+      54003,
+      78004
+    ],
+    "end": 78244,
+    "request": 4596240,
+    "generation": 1170952916,
+    "draws": 5
+  },
+  {
+    "seed": 17,
+    "contour": 3,
+    "duration": 1,
+    "rises": [
+      24001,
+      30002,
+      36002
+    ],
+    "end": 48002,
+    "request": 4596240,
+    "generation": 689350324,
+    "draws": 4
+  },
+  {
+    "seed": 17,
+    "contour": 4,
+    "duration": 0,
+    "rises": [
+      6001,
+      18001,
+      42002,
+      54003,
+      60003
+    ],
+    "end": 60243,
+    "request": 4596240,
+    "generation": 1170952916,
+    "draws": 5
+  },
+  {
+    "seed": 17,
+    "contour": 4,
+    "duration": 1,
+    "rises": [
+      6001,
+      18001,
+      30002
+    ],
+    "end": 48002,
+    "request": 4596240,
+    "generation": 689350324,
+    "draws": 4
+  }
+]
