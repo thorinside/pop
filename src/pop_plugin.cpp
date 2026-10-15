@@ -36,12 +36,13 @@ const _NT_parameter defaults[] = {
 static_assert(sizeof(defaults) / sizeof(defaults[0]) == NumParameters);
 const uint8_t mainParams[] = {TerminationParam, CountParam,  DurationParam,
                               RateParam,        ManualParam, RetriggerParam};
-const uint8_t shapeParams[] = {IrregularityParam, ContourParam, AmountParam, TimingParam};
-const uint8_t routingParams[] = {TriggerInputParam, ClockInputParam,   BurstOutputParam,
-                                 BurstModeParam,    ActiveOutputParam, ActiveModeParam};
+const uint8_t shapeParams[] = {IrregularityParam, ContourParam, AmountParam};
+const uint8_t routingParams[] = {TriggerInputParam, TimingParam, ClockInputParam,
+                                 BurstOutputParam, BurstModeParam, ActiveOutputParam,
+                                 ActiveModeParam};
 const _NT_parameterPage pages[] = {{"Burst", 6, 0, {0, 0}, mainParams},
-                                   {"Shape", 4, 0, {0, 0}, shapeParams},
-                                   {"Routing", 6, 0, {0, 0}, routingParams}};
+                                   {"Shape", 3, 0, {0, 0}, shapeParams},
+                                   {"Routing", 7, 0, {0, 0}, routingParams}};
 const _NT_parameterPages allPages = {3, pages};
 struct Algorithm : _NT_algorithm {
     explicit Algorithm(uint32_t seed) : _NT_algorithm{}, engine(NT_globals.sampleRate, seed) {

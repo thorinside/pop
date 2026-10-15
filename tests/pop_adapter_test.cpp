@@ -202,6 +202,15 @@ void routing() {
     CHECK(loaded.values[RateParam] == -2 && loaded.values[DurationParam] == 6);
     CHECK(h.factory->guid == NT_MULTICHAR('T', 'h', 'P', 'o'));
     CHECK(h.algorithm->parameterPages->numPages == 3);
+    const auto &shape = h.algorithm->parameterPages->pages[1];
+    const auto &routing = h.algorithm->parameterPages->pages[2];
+    CHECK(std::string(shape.name) == "Shape" && shape.numParams == 3);
+    CHECK(std::string(routing.name) == "Routing" && routing.numParams == 7);
+    const std::array<uint8_t, 7> routingOrder = {
+        TriggerInputParam, TimingParam, ClockInputParam, BurstOutputParam,
+        BurstModeParam, ActiveOutputParam, ActiveModeParam};
+    for (size_t j = 0; j < routingOrder.size(); ++j)
+        CHECK(routing.params[j] == routingOrder[j]);
     std::array<int, NumParameters> visited{};
     for (uint32_t p = 0; p < 3; ++p) {
         const auto &page = h.algorithm->parameterPages->pages[p];

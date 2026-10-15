@@ -16,7 +16,7 @@ The trigger detector arms at or below 1 V and fires at or above 2 V. It retains 
 
 ## Controls
 
-All controls use normal NT parameter pages and mappings. Burst, Shape and Routing pages keep standard parameter navigation.
+All controls use normal NT parameter pages and mappings. Burst, Shape and Routing pages keep standard parameter navigation. Timing sits directly above Clock input on the Routing page. Clock input is inactive in Internal and enabled when Timing is Clock; this does not mean Clock generation is implemented in D1.
 
 | Control | Range | Default | Meaning |
 | --- | --- | --- | --- |
