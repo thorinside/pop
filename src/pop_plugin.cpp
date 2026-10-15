@@ -17,12 +17,12 @@ const char *const beatNames[] = {"0.25 beats", "0.5 beats", "1 beat",   "2 beats
 const char *const ratioNames[] = {"/8", "/4", "/2", "unity", "x2", "x4", "x8", nullptr};
 const _NT_parameter defaults[] = {
     {"Termination", 0, 1, 0, kNT_unitEnum, 0, terminationNames},
-    {"Count", 1, 64, 8, kNT_unitNone, 0, nullptr},
+    {"Count", 1, 64, 4, kNT_unitNone, 0, nullptr},
     {"Duration", 100, 30000, 500, kNT_unitSeconds, kNT_scaling1000, nullptr},
     {"Rate", 10, 1000, 200, kNT_unitHz, kNT_scaling10, nullptr},
-    {"Irregularity", 0, 100, 50, kNT_unitPercent, 0, nullptr},
-    {"Contour", 0, 4, 2, kNT_unitEnum, 0, contourNames},
-    {"Contour amount", 0, 100, 75, kNT_unitPercent, 0, nullptr},
+    {"Irregularity", 0, 100, 0, kNT_unitPercent, 0, nullptr},
+    {"Contour", 0, 4, 0, kNT_unitEnum, 0, contourNames},
+    {"Contour amount", 0, 100, 100, kNT_unitPercent, 0, nullptr},
     {"Retrigger", 0, 1, 1, kNT_unitEnum, 0, offOn},
     {"Timing", 0, 1, 0, kNT_unitEnum, 0, timingNames},
     {"Trigger input", 0, kNT_lastBus, 1, kNT_unitCvInput, 0, nullptr},
@@ -125,7 +125,8 @@ bool validRouting(const int16_t *v) {
 }
 Settings settings(const Algorithm &a) {
     Settings s;
-    s.termination = static_cast<Termination>(a.v[TerminationParam]);
+    s.termination = a.v[TerminationParam] >= 0 && a.v[TerminationParam] <= 1
+        ? static_cast<Termination>(a.v[TerminationParam]) : static_cast<Termination>(255);
     s.timing = static_cast<Timing>(a.v[TimingParam]);
     s.count = a.v[CountParam];
     s.durationMs = a.mode ? a.internalDuration : a.v[DurationParam];
@@ -133,7 +134,8 @@ Settings settings(const Algorithm &a) {
     s.clockRate = a.mode ? a.v[RateParam] : a.clockRate;
     s.durationBeatsIndex = a.mode ? a.v[DurationParam] : a.clockDuration;
     s.irregularity = a.v[IrregularityParam];
-    s.contour = static_cast<Contour>(a.v[ContourParam]);
+    s.contour = a.v[ContourParam] >= 0 && a.v[ContourParam] <= 4
+        ? static_cast<Contour>(a.v[ContourParam]) : static_cast<Contour>(255);
     s.amount = a.v[AmountParam];
     return s;
 }
@@ -189,7 +191,7 @@ void step(_NT_algorithm *self, float *buffers, int by4) {
         const float tv = bus(trigger, false) ? buffers[(trigger - 1) * frames + i] : 0.0f;
         const float cv = bus(clock, false) ? buffers[(clock - 1) * frames + i] : 0.0f;
         bool start = a.trigger.observe(tv);
-        (void)a.clock.observe(cv);
+        const bool clockEdge = a.clock.observe(cv);
         if (i == 0) {
             if (a.v[ManualParam] == 0)
                 a.manualArmed = true;
@@ -200,7 +202,8 @@ void step(_NT_algorithm *self, float *buffers, int by4) {
         }
         if (!a.routingValid || (reset && i == 0))
             start = false;
-        const Output out = a.engine.tick(current, a.v[RetriggerParam] == 1, {start, false, false});
+        const Output out = a.engine.tick(current, a.v[RetriggerParam] == 1,
+                                          {start, false, false, clockEdge, clock != 0});
         if (!a.routingValid)
             a.engine.setError(Error::InvalidRouting);
         else if (start && current.timing == Timing::Clock && clock == 0)
@@ -221,12 +224,13 @@ bool draw(_NT_algorithm *self) {
     case Phase::Idle:
         break;
     case Phase::Pending:
-        status = "Waiting for gap";
+        status = a.v && a.v[TimingParam] == 1 ? "Waiting for clock" : "Waiting for gap";
         break;
     case Phase::Generating:
         status = "Active";
         break;
     case Phase::Draining:
+    case Phase::AbortedDraining:
         status = "Draining";
         break;
     }
@@ -245,8 +249,11 @@ bool draw(_NT_algorithm *self) {
     case Error::NoClock:
         error = "No clock input";
         break;
-    case Error::ClockIncomplete:
-        error = "Clock not implemented (D1)";
+    case Error::ClockStopped:
+        error = "Clock stopped or invalid";
+        break;
+    case Error::ClockTimeout:
+        error = "Clock wait timeout";
         break;
     }
     NT_drawText(2, 38, error);
@@ -315,9 +322,9 @@ bool deserialise(_NT_algorithm *self, _NT_jsonParse &parse) {
     a.retainedPending = true;
     return true;
 }
-const _NT_factory factory = {NT_MULTICHAR('T', 'h', 'P', 'o'),
+const _NT_factory factory = {NT_MULTICHAR('T', 'h', 'P', 'p'),
                              "Pop",
-                             "Finite organic bursts (Internal D1)",
+                             "Finite organic Count and Duration bursts",
                              0,
                              nullptr,
                              nullptr,

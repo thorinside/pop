@@ -18,7 +18,16 @@ $(BUILD)/sample_math_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_ma
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_sample_math_test.cpp -o $@
 $(BUILD)/regressions_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_regressions_test.cpp tests/check.h | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_regressions_test.cpp -o $@
-test: $(BUILD)/engine_test $(BUILD)/adapter_test $(BUILD)/rates_test $(BUILD)/sample_math_test $(BUILD)/regressions_test
+$(BUILD)/clock_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_clock_test.cpp tests/check.h | $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_clock_test.cpp -o $@
+$(BUILD)/clock_boundaries_test: src/pop_engine.cpp src/pop_engine.h src/pop_sample_math.h tests/pop_clock_boundaries_test.cpp tests/check.h | $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) src/pop_engine.cpp tests/pop_clock_boundaries_test.cpp -o $@
+clock-test: $(BUILD)/clock_test $(BUILD)/clock_boundaries_test
+	$(BUILD)/clock_test
+	$(BUILD)/clock_boundaries_test
+test: $(BUILD)/engine_test $(BUILD)/adapter_test $(BUILD)/rates_test $(BUILD)/sample_math_test $(BUILD)/regressions_test $(BUILD)/clock_test $(BUILD)/clock_boundaries_test
+	$(BUILD)/clock_test
+	$(BUILD)/clock_boundaries_test
 	$(BUILD)/sample_math_test
 	python3 tests/check_arm_imports_test.py
 	$(BUILD)/engine_test
@@ -31,9 +40,11 @@ $(BUILD)/adapter_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plu
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_adapter_test.cpp -o $@
 $(BUILD)/rates_test: $(SRC) src/pop_engine.h src/pop_sample_math.h src/pop_plugin.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_rates_test.cpp tests/check.h | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_rates_test.cpp -o $@
-live: $(BUILD)/adapter_test $(BUILD)/rates_test
+live: $(BUILD)/adapter_test $(BUILD)/rates_test $(BUILD)/clock_test $(BUILD)/clock_boundaries_test
 	$(BUILD)/adapter_test
 	$(BUILD)/rates_test
+	$(BUILD)/clock_test
+	$(BUILD)/clock_boundaries_test
 $(BUILD)/perf: $(SRC) src/pop_sample_math.h tests/nt_host_driver.cpp tests/nt_host_driver.h tests/pop_perf.cpp | $(BUILD)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) $(SRC) tests/nt_host_driver.cpp tests/pop_perf.cpp -o $@
 perf: $(BUILD)/perf

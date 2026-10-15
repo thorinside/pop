@@ -5,25 +5,27 @@ namespace pop {
 enum class Termination : uint8_t { Count, Duration };
 enum class Timing : uint8_t { Internal, Clock };
 enum class Contour : uint8_t { Flat, Acceleration, Deceleration, RiseFall, FallRise };
-enum class Phase : uint8_t { Idle, Pending, Generating, Draining };
+enum class Phase : uint8_t { Idle, Pending, Generating, Draining, AbortedDraining };
 enum Limit : uint8_t { BaseLimited = 1, DurationLimited = 2, PhysicalLimited = 4 };
-enum class Error : uint8_t { None, InvalidSettings, InvalidRouting, NoClock, ClockIncomplete };
+enum class Error : uint8_t { None, InvalidSettings, InvalidRouting, NoClock, ClockStopped, ClockTimeout };
 struct Settings {
     Termination termination = Termination::Count;
     Timing timing = Timing::Internal;
-    int count = 8;
+    int count = 4;
     int durationMs = 500;
     int rateTenths = 200;
     int clockRate = 0;
     int durationBeatsIndex = 2;
-    int irregularity = 50;
-    Contour contour = Contour::Deceleration;
-    int amount = 75;
+    int irregularity = 0;
+    Contour contour = Contour::Flat;
+    int amount = 100;
 };
 struct Events {
     bool start = false;
     bool cancel = false;
     bool reset = false;
+    bool clock = false;
+    bool clockConnected = true;
 };
 struct Output {
     bool burst;
@@ -37,6 +39,20 @@ uint32_t advance(uint32_t x);
 double contourHeight(Contour contour, double u);
 uint64_t internalGap(double length, bool onset, uint32_t width, uint32_t gap, uint8_t &limits);
 bool valid(const Settings &settings);
+
+struct ClockTracker {
+    enum class State : uint8_t { Empty, First, Locked };
+    State state = State::Empty;
+    uint64_t last = 0, period = 0;
+    bool expire(uint64_t now);
+    bool observe(uint64_t now, uint32_t fs);
+};
+struct ClockWait {
+    uint64_t ticks;
+    uint64_t offset;
+};
+ClockWait clockWait(double length, uint64_t period, uint64_t ticks, uint64_t previousOffset,
+                    bool onset, uint32_t width, uint32_t gap, uint8_t &limits);
 
 class Engine {
   public:
@@ -61,6 +77,7 @@ class Engine {
   private:
     void accept(const Settings &settings);
     void activate();
+    void abortClock();
     void schedule(bool onset);
     bool high() const { return now_ < fall_; }
     uint32_t fs_, width_, gap_, requestRng_, generationRng_ = 0;
@@ -71,6 +88,8 @@ class Engine {
     Settings snapshot_{};
     Error error_ = Error::None;
     uint8_t limits_ = 0;
-    bool dueValid_ = false;
+    bool dueValid_ = false, musicalHigh_ = false;
+    ClockTracker tracker_{};
+    uint64_t requestSample_ = 0, period_ = 0, ticks_ = 0;
 };
 } // namespace pop

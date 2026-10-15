@@ -201,7 +201,7 @@ void routing() {
     loaded.set(TimingParam, 1);
     loaded.process(4);
     CHECK(loaded.values[RateParam] == -2 && loaded.values[DurationParam] == 6);
-    CHECK(h.factory->guid == NT_MULTICHAR('T', 'h', 'P', 'o'));
+    CHECK(h.factory->guid == NT_MULTICHAR('T', 'h', 'P', 'p'));
     CHECK(h.algorithm->parameterPages->numPages == 3);
     const auto &shape = h.algorithm->parameterPages->pages[1];
     const auto &routing = h.algorithm->parameterPages->pages[2];

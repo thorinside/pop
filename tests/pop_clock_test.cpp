@@ -57,6 +57,27 @@ void expect(const host::Trace &t, const std::vector<uint64_t> &rises, uint64_t a
     std::puts(",PASS");
 }
 int main() {
+    {
+        host::Instance fresh;
+        CHECK(fresh.factory->guid == 0x70506854u);
+        CHECK(fresh.values[TimingParam] == 0 && fresh.values[TerminationParam] == 0 &&
+              fresh.values[CountParam] == 4 && fresh.values[IrregularityParam] == 0 &&
+              fresh.values[ContourParam] == 0 && fresh.values[AmountParam] == 100 &&
+              fresh.values[RateParam] == 200);
+        expect(fresh.run(11000, 28, {0}), {2400,4800,7200,9600}, 0,9840);
+        fresh.set(CountParam,13); fresh.set(IrregularityParam,67);
+        fresh.set(ContourParam,4); fresh.set(AmountParam,12);
+        const auto saved=fresh.save();
+        CHECK(fresh.load(saved)); fresh.process(4);
+        CHECK(fresh.values[CountParam]==13 && fresh.values[IrregularityParam]==67 &&
+              fresh.values[ContourParam]==4 && fresh.values[AmountParam]==12);
+        for(int p : {TerminationParam,ContourParam}) {
+            host::Instance malformed; malformed.set(p,256);
+            CHECK(malformed.run(11000,128,{0}).rises.empty());
+            CHECK(inspectEngine(malformed.algorithm).error()==Error::InvalidSettings);
+        }
+        std::puts("factory,ThPp,owner-defaults,four pulses,saved settings,raw enums,PASS");
+    }
     const std::vector<std::vector<uint64_t>> expected = {
         {3000,6000,9000,12000,15000,18000,21000,23999},
         {3000,6000,9000,12000,15000,18000,21000,24000},
