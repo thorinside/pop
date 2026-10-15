@@ -69,4 +69,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Pop $GITHUB_REF_NAME" --notes "Experimental API v14 prerelease. See the versioned manual and build provenance. Physical firmware compatibility, loader/resources, DAC/receiver timing and musical qualification remain unverified. ThPp replaces the old ThPo development identity; old development presets may need Pop re-added."
+          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Pop $GITHUB_REF_NAME" --notes "Experimental API v14 prerelease. See the versioned manual and build provenance. Shaped-Clock host/Cortex-M/firmware exp2 numerical equivalence remains UNVERIFIED. Physical firmware compatibility, loader/resources, DAC/receiver timing and musical qualification remain unverified. ThPp replaces the old ThPo development identity; old development presets may need Pop re-added."
